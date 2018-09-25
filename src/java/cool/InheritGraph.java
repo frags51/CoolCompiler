@@ -55,10 +55,7 @@ public class InheritGraph{
                 
                 map.get(parent).children.add(curr.name);
             }
-        }
-
-        boolean foundCycle = CheckCycle();
-        
+        }        
     }
 
 
@@ -81,7 +78,7 @@ public class InheritGraph{
             //Checks a non visited node
             if(visited.get(curr) == false) {
                 if(ParseTree(curr,visited,activeStack)){
-                    GlobalError.reportError(curr, map.get(curr).lineNo, "Cycle found involving class"+curr);
+                    GlobalError.reportError(curr, map.get(curr).lineNo, "Cycle found involving class "+curr + "!");
                     return true;
                 }
             }
@@ -92,17 +89,17 @@ public class InheritGraph{
     /* Returns whether this particular parse with curr has a cycle */
     private boolean ParseTree(String curr, HashMap<String, Boolean> visited,HashMap<String, Boolean> activeStack ){
         activeStack.put(curr,true);
+        visited.put(curr,true);
         for( String currChild : map.get(curr).children ){
-            /* Checks if child is unvisited and parse of it's child includes this current node for back edge */
+            /* Checks if child is unvisited and parse of its child includes this current node for back edge */
             if( visited.get(currChild) == false && ParseTree(currChild, visited, activeStack)){
                 return true;
             }
             else if(activeStack.get(currChild) ==true) return true;
         }
+        /* Pop current node out of stack */
         activeStack.put(curr,false);
-        return false;
-        
+        return false;   
     }
-
 
 }
