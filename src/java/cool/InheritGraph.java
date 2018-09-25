@@ -18,7 +18,11 @@ public class InheritGraph{
     /* Init Map, Update AST.class_ Nodes and Check if Main Class exists, and no class is defined twice. */
     public InheritGraph(AST.program program){
         hasMain = false;
-        classList = program.classes;        
+        classList = program.classes;
+        map = new HashMap<>();      
+
+        
+
         /* First run on the classList for populating the map for obtaining parent references */
         for (AST.class_ curr : classList){
             /* Class redefined */
