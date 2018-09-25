@@ -1,5 +1,6 @@
 package cool;
 import java.util.List;
+import java.util.ArrayList;
 public class AST{
 	public static class ASTNode {
 		int lineNo;
@@ -416,12 +417,22 @@ public class AST{
 		public String filename;
 		public String parent;
 		public List<feature> features;
+
+		// Our Additions
+		public AST.class_ parentClass;
+		public List<AST.class_> children;
+		public boolean decl; 
+
 		public class_(String n, String f, String p, List<feature> fs, int l){
 			name = n;
 			filename = f;
 			parent = p;
 			features = fs;
 			lineNo = l;
+
+			// Our Additions
+			decl = false;
+			children = new ArrayList<AST.class_>();
 		}
 		String getString(String space){
 			String str;
