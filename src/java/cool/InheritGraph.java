@@ -15,14 +15,14 @@ public class InheritGraph{
     /* Stores updated class list with updated child and parent pointers */
     public List<AST.class_> classList;
     
-
+    /* Init Map, Update AST.class_ Nodes and Check if Main Class exists, and no class is defined twice. */
     public InheritGraph(AST.program program){
         hasMain = false;
         classList = program.classes;        
         /* First run on the classList for populating the map for obtaining parent references */
         for (AST.class_ curr : classList){
             /* Class redefined */
-            if(map.containsKey(curr.name)) /*reportError(redefinition) */;
+            if(map.containsKey(curr.name)) GlobalError.reportError(curr.filename, curr.lineNo, "Multiple definitions of same class!");
             else{
                 map.put(curr.name, curr);
                 /* Main reported*/
@@ -32,7 +32,7 @@ public class InheritGraph{
         
         
         /* Main not found */
-        if(!hasMain) /*reportError(Nomain)*/;
+        if(!hasMain) GlobalError.reportError("", "", "No Main Class found!");
         
         /* Updates the child and parent pointers */
         for( AST.class_ curr : classList){
@@ -40,11 +40,7 @@ public class InheritGraph{
             curr.parentClass = map.get(parent);
             map.get(parent).children.add(curr.name);
         }
-
-    
-    
     }
-
 
 
     /* Checks if there is a cycle i.e. a child is a self conforming class */
