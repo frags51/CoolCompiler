@@ -22,7 +22,7 @@ public class InheritGraph{
         /* First run on the classList for populating the map for obtaining parent references */
         for (AST.class_ curr : classList){
             /* Class redefined */
-            if(map.containsKey(curr.name)) GlobalError.reportError(curr.filename, curr.lineNo, "Multiple definitions of same class!");
+            if(map.containsKey(curr.name)) GlobalError.reportError(curr.filename, curr.lineNo, "Multiple definitions of same class: "+curr.name+"!");
             else{
                 map.put(curr.name, curr);
                 /* Main reported*/
@@ -32,7 +32,7 @@ public class InheritGraph{
         
         
         /* Main not found */
-        if(!hasMain) GlobalError.reportError("", "", "No Main Class found!");
+        if(!hasMain) GlobalError.reportError("", 0, "No Main Class found!");
         
         /* Updates the child and parent pointers */
         for( AST.class_ curr : classList){
