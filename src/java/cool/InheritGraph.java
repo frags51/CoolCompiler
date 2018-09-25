@@ -41,8 +41,14 @@ public class InheritGraph{
         /* Updates the child and parent pointers */
         for( AST.class_ curr : classList){
             String parent = curr.parent;
-            curr.parentClass = map.get(parent);
-            map.get(parent).children.add(curr.name);
+            System.out.println(curr.name);
+            
+            /* TODO : Add object class parent null exception */
+            if(map.containsKey(parent)){
+                curr.parentClass = map.get(parent);
+                
+                map.get(parent).children.add(curr.name);
+            }
         }
     }
 
