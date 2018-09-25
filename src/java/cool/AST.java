@@ -420,7 +420,7 @@ public class AST{
 
 		// Our Additions
 		public AST.class_ parentClass;
-		public List<AST.class_> children;
+		public List<String> children;
 		public boolean decl; 
 
 		public class_(String n, String f, String p, List<feature> fs, int l){
@@ -432,7 +432,7 @@ public class AST{
 
 			// Our Additions
 			decl = false;
-			children = new ArrayList<AST.class_>();
+			children = new ArrayList<String>();
 		}
 		String getString(String space){
 			String str;
