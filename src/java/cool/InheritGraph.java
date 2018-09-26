@@ -53,11 +53,19 @@ public class InheritGraph{
             String parent = curr.parent;
             
             /* TODO : Add object class parent null exception */
-            if(map.containsKey(parent)){
-                curr.parentClass = map.get(parent);
+            if(parent!=null){
+                if(!isInheritableClass(parent)){
+                    GlobalError.reportError(curr.filename, curr.lineNo, "Error: Cannot Inherit from: "+parent);
+                    // Set the Parent to Object now, for further semantic checks?
+                    parent = "Object";
+                }
+                if(map.containsKey(parent)){
+                    curr.parentClass = map.get(parent);
+                    map.get(parent).children.add(curr.name);
+                }
                 
-                map.get(parent).children.add(curr.name);
             }
+
         }        
     }
 
@@ -151,4 +159,8 @@ public class InheritGraph{
         classList.add(boolCl);
     } // addBaseClassesToGraph
 
+    private boolean isInheritableClass(String clName){
+        if(clName.equals("Int") || clName.equals("String") || clName.equals("Bool")) return false;
+        return true;
+    }
 } // Class ends
