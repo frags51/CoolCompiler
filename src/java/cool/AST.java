@@ -2,8 +2,13 @@ package cool;
 import java.util.List;
 import java.util.ArrayList;
 public class AST{
-	public static class ASTNode {
+	public static class ASTNode implements VisitableElement{
 		int lineNo;
+
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 	}
 	public static String sp = "  ";
 
@@ -30,15 +35,23 @@ public class AST{
 
 	
 	public static class expression extends ASTNode {
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		String type;
 		public expression(){
 			type = "_no_type";
 		}
 		String getString(String space){
 			return "";
-		};
+		}
 	}
 	public static class no_expr extends expression {
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public no_expr(int l){
 			lineNo = l;
 		}
@@ -47,6 +60,10 @@ public class AST{
 		}
 	}
 	public static class bool_const extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public boolean value;
 		public bool_const(boolean v, int l){
 			value = v;
@@ -57,6 +74,10 @@ public class AST{
 		}
 	}
 	public static class string_const extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public String value;
 		public string_const(String v, int l){
 			value = v;
@@ -68,6 +89,10 @@ public class AST{
 	}
 
 	public static class int_const extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public int value;
 		public int_const(int v, int l){
 			value = v;
@@ -79,6 +104,10 @@ public class AST{
 	}
 
 	public static class object extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public String name;
 		public object(String v, int l){
 			name = v;
@@ -89,6 +118,10 @@ public class AST{
 		}
 	}
 	public static class comp extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression e1;
 		public comp(expression v, int l){
 			e1 = v;
@@ -99,6 +132,10 @@ public class AST{
 		}
 	}
 	public static class eq extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression e1;
 		public expression e2;
 		public eq(expression v1, expression v2, int l){
@@ -113,6 +150,10 @@ public class AST{
 	
 
 	public static class leq extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression e1;
 		public expression e2;
 		public leq(expression v1, expression v2, int l){
@@ -126,6 +167,10 @@ public class AST{
 	}
 
 	public static class lt extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression e1;
 		public expression e2;
 		public lt(expression v1, expression v2, int l){
@@ -138,6 +183,10 @@ public class AST{
 		}
 	}
 	public static class neg extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression e1;
 		public neg(expression v, int l){
 			e1 = v;
@@ -148,6 +197,10 @@ public class AST{
 		}
 	}
 	public static class divide extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression e1;
 		public expression e2;
 		public divide(expression v1, expression v2, int l){
@@ -160,6 +213,10 @@ public class AST{
 		}
 	}
 	public static class mul extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression e1;
 		public expression e2;
 		public mul(expression v1, expression v2, int l){
@@ -172,6 +229,10 @@ public class AST{
 		}
 	}
 	public static class sub extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression e1;
 		public expression e2;
 		public sub(expression v1, expression v2, int l){
@@ -184,6 +245,10 @@ public class AST{
 		}
 	}
 	public static class plus extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression e1;
 		public expression e2;
 		public plus(expression v1, expression v2, int l){
@@ -196,6 +261,10 @@ public class AST{
 		}
 	}
 	public static class isvoid extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression e1;
 		public isvoid(expression v, int l){
 			e1 = v;
@@ -206,6 +275,10 @@ public class AST{
 		}
 	}
 	public static class new_ extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public String typeid;
 		public new_(String t, int l){
 			typeid = t;
@@ -216,6 +289,10 @@ public class AST{
 		}
 	}
 	public static class assign extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public String name;
 		public expression e1;
 		public assign(String n, expression v1, int l){
@@ -228,6 +305,10 @@ public class AST{
 		}
 	}
 	public static class block extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public List<expression> l1;
 		public block(List<expression> v1, int l){
 			l1 = v1;
@@ -243,6 +324,10 @@ public class AST{
 		}
 	}
 	public static class loop extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression predicate;
 		public expression body;
 		public loop(expression v1, expression v2, int l){
@@ -255,6 +340,10 @@ public class AST{
 		}
 	}
 	public static class cond extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression predicate;
 		public expression ifbody;
 		public expression elsebody;
@@ -269,6 +358,10 @@ public class AST{
 		}
 	}
 	public static class let extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public String name;
 		public String typeid;
 		public expression value;
@@ -285,6 +378,10 @@ public class AST{
 		}
 	}
 	public static class dispatch extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression caller;
 		public String name;
 		public List<expression> actuals;
@@ -305,6 +402,10 @@ public class AST{
 		}
 	}
 	public static class static_dispatch extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
                 public expression caller;
 		public String typeid;
                 public String name;
@@ -327,6 +428,10 @@ public class AST{
                 }
         }
 	public static class typcase extends expression{
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public expression predicate;
 		public List<branch> branches;
 		public typcase(expression p, List<branch> b, int l){
@@ -344,6 +449,10 @@ public class AST{
 		}
 	}
 	public static class branch extends ASTNode {
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public String name;
 		public String type;
 		public expression value;
@@ -358,6 +467,10 @@ public class AST{
 		}
 	}
 	public static class formal extends ASTNode {
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public String name;
 		public String typeid;
 		public formal(String n, String t, int l){
@@ -370,6 +483,10 @@ public class AST{
 		}
 	}
 	public static class feature extends ASTNode {
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public feature(){
 		}
 		String getString(String space){
@@ -378,6 +495,10 @@ public class AST{
 
 	}
 	public static class method extends feature {
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public String name;
 		public List<formal> formals;
 		public String typeid;
@@ -402,6 +523,10 @@ public class AST{
 		}
 	}
 	public static class attr extends feature {
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public String name;
 		public String typeid;
 		public expression value;
@@ -416,6 +541,10 @@ public class AST{
 		}
 	}
 	public static class class_ extends ASTNode {
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public String name;
 		public String filename;
 		public String parent;
@@ -448,6 +577,10 @@ public class AST{
 		}
 	}
 	public static class program extends ASTNode {
+		@Override
+		public void accept(Visitor x) {
+			x.visit(this);
+		}
 		public List<class_> classes;
 		public program(List<class_> c, int l){
 			classes = c;
