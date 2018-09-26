@@ -32,8 +32,12 @@ public class InheritGraph{
         this.addBaseClassesToGraph();
         numClasses = classList.size();
 
+        /* Run on the classList for populating the map for obtaining parent-child references */
+        PopulateAndLink();
+        
+    }
 
-        /* First run on the classList for populating the map for obtaining parent references */
+    private void PopulateAndLink(){
         for (AST.class_ curr : classList){
             /* Class redefined */
             if(map.containsKey(curr.name)) GlobalError.reportError(curr.filename, curr.lineNo, "Multiple definitions of same class: "+curr.name+"!");
