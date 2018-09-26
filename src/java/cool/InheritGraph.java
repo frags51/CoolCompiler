@@ -38,7 +38,7 @@ public class InheritGraph{
         
     }
 
-    protected boolean inValidInheritanceGraph(){
+    protected boolean inValidInheriztanceGraph(){
         return !this.populateAndLink() || this.checkCycle();
     }
 
