@@ -33,14 +33,23 @@ public class InheritGraph{
         numClasses = classList.size();
 
         /* Run on the classList for populating the map for obtaining parent-child references */
-        PopulateAndLink();
+        // Run this from Semantic
+        //populateAndLink();
         
     }
 
-    private void PopulateAndLink(){
+    protected boolean inValidInheritanceGraph(){
+        return !this.populateAndLink() || this.checkCycle();
+    }
+
+    private boolean populateAndLink(){
+        boolean retVal = true;
         for (AST.class_ curr : classList){
             /* Class redefined */
-            if(map.containsKey(curr.name)) GlobalError.reportError(curr.filename, curr.lineNo, "Multiple definitions of same class: "+curr.name+"!");
+            if(map.containsKey(curr.name)) {
+                GlobalError.reportError(curr.filename, curr.lineNo, "Multiple definitions of same class: "+curr.name+"!");
+                retVal=false;
+            }
             else{
                 map.put(curr.name, curr);
                 /* Main reported*/
@@ -50,7 +59,10 @@ public class InheritGraph{
         
         
         /* Main not found */
-        if(!hasMain) GlobalError.reportError("", 0, "No Main Class found!");
+        if(!hasMain) {
+            GlobalError.reportError("", 0, "No Main Class found!");
+            retVal = false;
+        }
         
         /* Updates the child and parent pointers */
         for( AST.class_ curr : classList){
@@ -62,6 +74,7 @@ public class InheritGraph{
                     GlobalError.reportError(curr.filename, curr.lineNo, "Error: Cannot Inherit from: "+parent);
                     // Set the Parent to Object now, for further semantic checks?
                     parent = "Object";
+                    retVal=false;
                 }
                 if(map.containsKey(parent)){
                     curr.parentClass = map.get(parent);
@@ -72,15 +85,17 @@ public class InheritGraph{
                     // Make Object its parent for further semantic check
                     curr.parentClass = map.get("Object");
                     map.get("Object").children.add(curr.name);
+                    retVal=false;
                 }
             } // Parent != null
 
         } // Iterate over class list
+        return retVal;
     }
 
 
     /* Checks if there is a cycle i.e. a child is a self conforming class */
-    public boolean CheckCycle(){
+    private boolean checkCycle(){
         /* Marks whether node has been seen or not */
         HashMap<String,Boolean> visited = new HashMap<>(); 
         
@@ -123,7 +138,7 @@ public class InheritGraph{
     }
 
     /* Add classes like Object, int etc. */
-    public void addBaseClassesToGraph(){
+    private void addBaseClassesToGraph(){
         String fn = "";
         if(!classList.isEmpty()) fn = classList.get(0).filename;
         // Create Object
