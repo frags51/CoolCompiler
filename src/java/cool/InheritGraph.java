@@ -138,8 +138,12 @@ public class InheritGraph{
 
         // Add IO()
         List<AST.feature> y = new ArrayList<>();
-        y.add(new AST.method("out_string", new ArrayList<AST.formal>(), "Object", null,0));
-        y.add(new AST.method("out_int", new ArrayList<AST.formal>(), "Object", null, 0));
+        List<AST.formal> gg = new ArrayList<>();
+        gg.add(new AST.formal("x", "String", 0));
+        y.add(new AST.method("out_string", gg, "Object", null,0));
+        List<AST.formal> gg_int = new ArrayList<>();
+        gg_int.add(new AST.formal("x", "Int", 0));
+        y.add(new AST.method("out_int", gg_int, "Object", null, 0));
         y.add(new AST.method("in_int", new ArrayList<AST.formal>(), "Int", null, 0));
         y.add(new AST.method("in_string", new ArrayList<AST.formal>(), "String", null, 0));
         AST.class_ io = new AST.class_("IO", fn, "Object", y, 0);

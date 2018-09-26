@@ -391,10 +391,13 @@ public class AST{
 		}
 		String getString(String space){
 			String str = space+"#"+lineNo+"\n"+space+"_method\n"+space+sp+name+"\n";
+
 			for ( formal f : formals ) {
+
 				str += f.getString(space+sp)+"\n";
 			}
-			str += space+sp+typeid+"\n"+body.getString(space+sp);
+			if(body == null) str += space+sp+typeid+"\n";
+			else str += space+sp+typeid+"\n"+body.getString(space+sp);
 			return str;
 		}
 	}
