@@ -92,7 +92,7 @@ public class InheritGraph{
         /* curr is class name */
         for( String curr : visited.keySet()){
             //Checks a non visited node
-            if(visited.get(curr) == false) {
+            if(!visited.get(curr)) {
                 if(ParseTree(curr,visited,activeStack)){
                     GlobalError.reportError(curr, map.get(curr).lineNo, "Cycle found involving class "+curr + "!");
                     return true;
@@ -108,10 +108,10 @@ public class InheritGraph{
         visited.put(curr,true);
         for( String currChild : map.get(curr).children ){
             /* Checks if child is unvisited and parse of its child includes this current node for back edge */
-            if( visited.get(currChild) == false && ParseTree(currChild, visited, activeStack)){
+            if( !visited.get(currChild) && ParseTree(currChild, visited, activeStack)){
                 return true;
             }
-            else if(activeStack.get(currChild) ==true) return true;
+            else if(activeStack.get(currChild)) return true;
         }
         /* Pop current node out of stack */
         activeStack.put(curr,false);
