@@ -28,7 +28,10 @@ public class InheritGraph{
         classList = program.classes;
         map = new HashMap<>();      
 
-        
+        // Add base Classes now. Can do some other parsing etc if needed before.
+        this.addBaseClassesToGraph();
+        numClasses = classList.size();
+
 
         /* First run on the classList for populating the map for obtaining parent references */
         for (AST.class_ curr : classList){
@@ -49,13 +52,26 @@ public class InheritGraph{
         for( AST.class_ curr : classList){
             String parent = curr.parent;
             
-            /* TODO : Add object class parent null exception */
-            if(map.containsKey(parent)){
-                curr.parentClass = map.get(parent);
-                
-                map.get(parent).children.add(curr.name);
-            }
-        }        
+            /* object class parent null exception */
+            if(parent!=null){
+                if(!isInheritableClass(parent)){
+                    GlobalError.reportError(curr.filename, curr.lineNo, "Error: Cannot Inherit from: "+parent);
+                    // Set the Parent to Object now, for further semantic checks?
+                    parent = "Object";
+                }
+                if(map.containsKey(parent)){
+                    curr.parentClass = map.get(parent);
+                    map.get(parent).children.add(curr.name);
+                }
+                else{ // Parent not found?
+                    GlobalError.reportError(curr.filename, curr.lineNo, "Error: "+curr.name+"'s parent: "+parent+" is not defined");
+                    // Make Object its parent for further semantic check
+                    curr.parentClass = map.get("Object");
+                    map.get("Object").children.add(curr.name);
+                }
+            } // Parent != null
+
+        } // Iterate over class list
     }
 
 
@@ -102,4 +118,54 @@ public class InheritGraph{
         return false;   
     }
 
-}
+    /* Add classes like Object, int etc. */
+    public void addBaseClassesToGraph(){
+        String fn = "";
+        if(!classList.isEmpty()) fn = classList.get(0).filename;
+        // Create Object
+        List<AST.feature> x = new ArrayList<>();
+        x.add(new AST.method("abort", new ArrayList<AST.formal>(), "Object", null,0));
+        x.add(new AST.method("type_name", new ArrayList<AST.formal>(), "String", null, 0));
+        // Add this? Might need to change !!
+        x.add(new AST.method("copy", new ArrayList<AST.formal>(), "Object", null, 0));
+        // Its parent is null!
+        AST.class_ obj = new AST.class_("Object", fn, null, x, 0);
+        classList.add(obj);
+
+        // Add IO()
+        List<AST.feature> y = new ArrayList<>();
+        y.add(new AST.method("out_string", new ArrayList<AST.formal>(), "Object", null,0));
+        y.add(new AST.method("out_int", new ArrayList<AST.formal>(), "Object", null, 0));
+        y.add(new AST.method("in_int", new ArrayList<AST.formal>(), "Int", null, 0));
+        y.add(new AST.method("in_string", new ArrayList<AST.formal>(), "String", null, 0));
+        AST.class_ io = new AST.class_("IO", fn, "Object", y, 0);
+        classList.add(io);
+
+        // Add String
+        List<AST.feature> z = new ArrayList<>();
+        List<AST.formal> zf = new ArrayList<>();
+        zf.add(new AST.formal("s", "String", 0));
+        List<AST.formal> zf2 = new ArrayList<>();
+        zf2.add(new AST.formal("i", "Int", 0));
+        zf2.add(new AST.formal("l", "Int", 0));
+
+        z.add(new AST.method("length", new ArrayList<AST.formal>(), "Int", null, 0));
+        z.add(new AST.method("concat", zf, "String", null, 0));
+        z.add(new AST.method("substr", zf2, "String", null, 0));
+        AST.class_ str = new AST.class_("String", fn, "Object", z, 0);
+        classList.add(str);
+        // Add Int
+        List<AST.feature> w = new ArrayList<>();
+        AST.class_ intCl = new AST.class_("Int", fn, "Object", w, 0);
+        classList.add(intCl);
+        // Add Bool
+        List<AST.feature> u = new ArrayList<>();
+        AST.class_ boolCl = new AST.class_("Bool", fn, "Object", u, 0);
+        classList.add(boolCl);
+    } // addBaseClassesToGraph
+
+    private boolean isInheritableClass(String clName){
+        if(clName.equals("Int") || clName.equals("String") || clName.equals("Bool")) return false;
+        return true;
+    }
+} // Class ends
