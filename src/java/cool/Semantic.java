@@ -17,11 +17,11 @@ public class Semantic{
 		//Write Semantic analyzer code here
 		InheritGraph graph = new InheritGraph(program);
 		if(graph.CheckCycle()){
-			//REPORT cycle
+		    // Do NO MORE SEMANTIC Analysis
+		    this.setErrorFlag();
+			return;
 		}
-		else{
-			
-		}
+		
 
 		// NEED TO SET ERROR FLAG HERE!
 		this.setErrorFlag();

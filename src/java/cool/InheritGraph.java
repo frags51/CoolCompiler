@@ -28,7 +28,10 @@ public class InheritGraph{
         classList = program.classes;
         map = new HashMap<>();      
 
-        
+        // Add base Classes now. Can do some other parsing etc if needed before.
+        this.addBaseClassesToGraph();
+        numClasses = classList.size();
+
 
         /* First run on the classList for populating the map for obtaining parent references */
         for (AST.class_ curr : classList){
