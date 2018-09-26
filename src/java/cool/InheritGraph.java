@@ -102,4 +102,50 @@ public class InheritGraph{
         return false;   
     }
 
-}
+    /* Add classes like Object, int etc. */
+    public void addBaseClassesToGraph(){
+        String fn = "";
+        if(!classList.isEmpty()) fn = classList.get(0).filename;
+        // Create Object
+        List<AST.feature> x = new ArrayList<>();
+        x.add(new AST.method("abort", new ArrayList<AST.formal>(), "Object", null,0));
+        x.add(new AST.method("type_name", new ArrayList<AST.formal>(), "String", null, 0));
+        // Add this? Might need to change !!
+        x.add(new AST.method("copy", new ArrayList<AST.formal>(), "Object", null, 0));
+        // Its parent is null!
+        AST.class_ obj = new AST.class_("Object", fn, null, x, 0);
+        classList.add(obj);
+
+        // Add IO()
+        List<AST.feature> y = new ArrayList<>();
+        y.add(new AST.method("out_string", new ArrayList<AST.formal>(), "Object", null,0));
+        y.add(new AST.method("out_int", new ArrayList<AST.formal>(), "Object", null, 0));
+        y.add(new AST.method("in_int", new ArrayList<AST.formal>(), "Int", null, 0));
+        y.add(new AST.method("in_string", new ArrayList<AST.formal>(), "String", null, 0));
+        AST.class_ io = new AST.class_("IO", fn, "Object", y, 0);
+        classList.add(io);
+
+        // Add String
+        List<AST.feature> z = new ArrayList<>();
+        List<AST.formal> zf = new ArrayList<>();
+        zf.add(new AST.formal("s", "String", 0));
+        List<AST.formal> zf2 = new ArrayList<>();
+        zf2.add(new AST.formal("i", "Int", 0));
+        zf2.add(new AST.formal("l", "Int", 0));
+
+        z.add(new AST.method("length", new ArrayList<AST.formal>(), "Int", null, 0));
+        z.add(new AST.method("concat", zf, "String", null, 0));
+        z.add(new AST.method("substr", zf2, "String", null, 0));
+        AST.class_ str = new AST.class_("String", fn, "Object", z, 0);
+        classList.add(str);
+        // Add Int
+        List<AST.feature> w = new ArrayList<>();
+        AST.class_ intCl = new AST.class_("Int", fn, "Object", w, 0);
+        classList.add(intCl);
+        // Add Bool
+        List<AST.feature> u = new ArrayList<>();
+        AST.class_ boolCl = new AST.class_("Bool", fn, "Object", u, 0);
+        classList.add(boolCl);
+    } // addBaseClassesToGraph
+
+} // Class ends
