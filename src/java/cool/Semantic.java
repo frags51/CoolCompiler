@@ -23,6 +23,11 @@ public class Semantic{
 			
 		}
 
+		// NEED TO SET ERROR FLAG HERE!
+		this.setErrorFlag();
+	}
 
+	private void setErrorFlag() {
+		if(GlobalError.getErrorFlag()) this.errorFlag=true;
 	}
 }
