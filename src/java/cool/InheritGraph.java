@@ -52,7 +52,7 @@ public class InheritGraph{
         for( AST.class_ curr : classList){
             String parent = curr.parent;
             
-            /* TODO : Add object class parent null exception */
+            /* object class parent null exception */
             if(parent!=null){
                 if(!isInheritableClass(parent)){
                     GlobalError.reportError(curr.filename, curr.lineNo, "Error: Cannot Inherit from: "+parent);
@@ -63,10 +63,15 @@ public class InheritGraph{
                     curr.parentClass = map.get(parent);
                     map.get(parent).children.add(curr.name);
                 }
-                
-            }
+                else{ // Parent not found?
+                    GlobalError.reportError(curr.filename, curr.lineNo, "Error: "+parent+" _> Parent Class is not defined");
+                    // Make Object its parent for further semantic check
+                    curr.parentClass = map.get("Object");
+                    map.get("Object").children.add(curr.name);
+                }
+            } // Parent != null
 
-        }        
+        } // Iterate over class list
     }
 
 
