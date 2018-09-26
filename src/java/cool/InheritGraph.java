@@ -13,9 +13,9 @@ public class InheritGraph{
     public HashMap<String,AST.class_> map;
     
     /* Checks if Input class list has a main class */
-    boolean hasMain;
+    private boolean hasMain;
 
-    int numClasses;
+    private int numClasses;
     /* Stores updated class list with updated child and parent pointers */
 
 
