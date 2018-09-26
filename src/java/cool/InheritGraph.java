@@ -64,7 +64,7 @@ public class InheritGraph{
                     map.get(parent).children.add(curr.name);
                 }
                 else{ // Parent not found?
-                    GlobalError.reportError(curr.filename, curr.lineNo, "Error: "+parent+" _> Parent Class is not defined");
+                    GlobalError.reportError(curr.filename, curr.lineNo, "Error: "+curr.name+"'s parent: "+parent+" is not defined");
                     // Make Object its parent for further semantic check
                     curr.parentClass = map.get("Object");
                     map.get("Object").children.add(curr.name);
