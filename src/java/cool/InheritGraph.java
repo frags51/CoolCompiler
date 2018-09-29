@@ -38,6 +38,14 @@ public class InheritGraph{
         
     }
 
+    public AST.class_ getRoot(){
+        return map.get("Object");
+    }
+
+
+
+
+
     boolean inValidInheritanceGraph(){
         return !this.populateAndLink() || this.checkCycle();
     }

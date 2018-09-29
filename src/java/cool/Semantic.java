@@ -15,14 +15,9 @@ public class Semantic{
 */
 	public Semantic(AST.program program){
 		//Write Semantic analyzer code here
-		InheritGraph graph = new InheritGraph(program);
-		if(graph.inValidInheritanceGraph()){
-		    // Do NO MORE SEMANTIC Analysis
-		    this.setErrorFlag();
-			return;
-		}
-		
 
+		Visitor visitor = new VisitorImpl();
+		program.accept(visitor);
 		// NEED TO SET ERROR FLAG HERE!
 		this.setErrorFlag();
 	}
