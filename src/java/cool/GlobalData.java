@@ -1,5 +1,9 @@
 package cool;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class GlobalData{
     /**
      * Map of Scope Tables for each class.
@@ -24,8 +28,16 @@ public class GlobalData{
      * Return the name of the variable mangled by the class name.
      * @return
      */
-    public static String varMangledName(String varName, String ClassName){
+
+    public static String varMangledName(String varName, String className){
         return varName;
     }
 
+    public static String funMangledName(String funName, String className){
+        return funName+className;
+    }
+
+    public static List<String> argTypesFromFun(String funName){
+        return new ArrayList<>();
+    }
 }

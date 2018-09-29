@@ -289,12 +289,74 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.dispatch x) {
+        x.caller.accept(this);
+        String callerType = x.caller.type;
+        String fRetType = GlobalData.scpTable.lookUpGlobal(GlobalData.funMangledName(x.name, callerType));
+        if(fRetType==null){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Function "+x.name+" not declared!");
+            x.type = "Object";
+            return;
 
+        }
+        List<String> argTypes = GlobalData.argTypesFromFun(GlobalData.funMangledName(x.name, callerType));
+
+        Iterator<AST.expression> actIt = x.actuals.iterator();
+        Iterator<String> typIt = argTypes.iterator();
+        AST.expression nextExpr;
+        String nextTyp;
+
+        while(actIt.hasNext() && typIt.hasNext()){
+            nextExpr = actIt.next();
+            nextExpr.accept(this);
+            nextTyp = typIt.next();
+            if(!GlobalData.inheritGraph.isSubType(nextExpr.type, nextTyp)){
+                GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Expected arg of type: "+nextTyp +"" +
+                        " but got: " + nextExpr.type );
+            }
+        }
+        if(actIt.hasNext() || typIt.hasNext()) GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: " +
+                "Mismatch in number of arguments to "+x.name);
+
+        x.type = fRetType;
     }
 
     @Override
     public void visit(AST.static_dispatch x) {
+        x.caller.accept(this);
+        String callerType = x.typeid;
+        if(!GlobalData.inheritGraph.isSubType(x.caller.type, x.typeid)){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Incorrect typing in static dispatch" +
+                    ": "+x.caller.type+" does not conform to "+x.typeid);
+            x.type="Object";
+            return;
+        }
+        String fRetType = GlobalData.scpTable.lookUpGlobal(GlobalData.funMangledName(x.name, callerType));
+        if(fRetType==null){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Function "+x.name+" not declared!");
+            x.type = "Object";
+            return;
 
+        }
+        List<String> argTypes = GlobalData.argTypesFromFun(GlobalData.funMangledName(x.name, callerType));
+
+        Iterator<AST.expression> actIt = x.actuals.iterator();
+        Iterator<String> typIt = argTypes.iterator();
+        AST.expression nextExpr;
+        String nextTyp;
+
+        while(actIt.hasNext() && typIt.hasNext()){
+            nextExpr = actIt.next();
+            nextExpr.accept(this);
+            nextTyp = typIt.next();
+            if(!GlobalData.inheritGraph.isSubType(nextExpr.type, nextTyp)){
+                GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Expected arg of type: "+nextTyp +"" +
+                        " but got: " + nextExpr.type );
+            }
+        }
+        if(actIt.hasNext() || typIt.hasNext()) GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: " +
+                "Mismatch in number of arguments to "+x.name);
+
+        x.type = fRetType;
     }
 
     @Override
@@ -331,39 +393,75 @@ public class TypeCheckVisitor implements Visitor{
         GlobalData.scpTable.exitScope();
     }
 
+    /**
+     * Just insert all these into the symbol table
+     * @param x The formal argument
+     */
     @Override
     public void visit(AST.formal x) {
-
+        if(!GlobalData.inheritGraph.doesTypeExist(x.typeid)){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Type "+ x.typeid+" doesn't exist!");
+            x.typeid="Object";
+        }
+        GlobalData.scpTable.insert(GlobalData.varMangledName(x.name, GlobalData.curClassName), x.typeid);
     }
 
+    /**
+     * Technically this should never be called.
+     */
     @Override
     public void visit(AST.feature x) {
-
+        if(GlobalError.DBG) GlobalError.reportError(GlobalData.curFileName, x.lineNo, "DEBUG: TypeCheckVisit on feature!");
     }
 
     @Override
     public void visit(AST.method x) {
+        GlobalData.scpTable.enterScope();
+
+        // Add these into the symbol table
+        for(AST.formal formal : x.formals){
+            formal.accept(this);
+        }
+        x.body.accept(this);
+        GlobalData.scpTable.exitScope();
 
     }
 
+    /**
+     * The attr is already declared. Now this is as good as an assign expression.
+     */
     @Override
     public void visit(AST.attr x) {
-
+        x.value.accept(this);
+        if(!x.value.type.equals(GlobalData.NOTYPE)) {
+            if (!GlobalData.inheritGraph.isSubType(x.value.type, x.typeid)) {
+                GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Invalid assignment from " +
+                        x.value.type + " to " + x.typeid + " !");
+            }
+            // else assign?
+        }
     }
 
     @Override
     public void visit(AST.class_ x) {
         GlobalData.curFileName = x.filename;
         GlobalData.curClassName = x.name;
-        GlobalData.scpTable.insert("self", x.name);
+        GlobalData.scpTable.insert(GlobalData.varMangledName("self", GlobalData.curClassName), x.name);
 
-        // Do stuff
+        // Evaluate each feature
+        for (AST.feature blah :
+                x.features) {
+            blah.accept(this);
+        }
 
-        GlobalData.scpTable.removeKey("self");
+        GlobalData.scpTable.removeKey(GlobalData.varMangledName("self", GlobalData.curClassName));
     }
 
     @Override
     public void visit(AST.program x) {
-
+        for (AST.class_ blah :
+                x.classes) {
+            blah.accept(this);
+        }
     }
 }
