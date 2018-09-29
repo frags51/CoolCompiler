@@ -30,4 +30,7 @@ public class ScopeTable<T> {
 		}
 		return null;
 	}
+	void removeKey(String key){
+		maps.get(scope).remove(key);
+	}
 }
