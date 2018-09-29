@@ -214,4 +214,20 @@ public class InheritGraph{
         } while(true);
         return t1.equals(t2);
     }
+
+    /**
+     * Least common ancestor of t1 and t2
+     */
+    public String lCA(String t1, String t2){
+        List<String> vis = new ArrayList<>();
+        while(!t1.equals("Object")) {
+            vis.add(t1);
+            t1 = map.get(t1).parent;
+        }
+        vis.add("Object");
+        while(!vis.contains(t2)){
+            t2 = map.get(t2).parent;
+        }
+        return t2;
+    }
 } // Class ends

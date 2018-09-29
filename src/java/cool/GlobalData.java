@@ -18,6 +18,8 @@ public class GlobalData{
      */
     public static InheritGraph inheritGraph;
 
+    public static final String NOTYPE = "_no_type";
+
     /**
      * Return the name of the variable mangled by the class name.
      * @return

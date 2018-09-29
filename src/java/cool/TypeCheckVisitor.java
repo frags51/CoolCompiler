@@ -1,5 +1,9 @@
 package cool;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class TypeCheckVisitor implements Visitor{
     @Override
     public void visit(AST.ASTNode x) {
@@ -223,24 +227,64 @@ public class TypeCheckVisitor implements Visitor{
         }
     }
 
+    /**
+     * Type is that of last expression in this list.
+     * @param x
+     */
     @Override
     public void visit(AST.block x) {
-        
+        for(AST.expression e : x.l1){
+            e.accept(this);
+        }
+        x.type = x.l1.get(x.l1.size()-1).type;
     }
 
     @Override
     public void visit(AST.loop x) {
-
+        x.predicate.accept(this);
+        if(!x.predicate.type.equals("Bool")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Predicate of loop must be boolean!");
+        }
+        x.body.accept(this);
+        x.type="Object";
     }
 
     @Override
     public void visit(AST.cond x) {
-
+        x.predicate.accept(this);
+        if(!x.predicate.type.equals("Bool")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Predicate of loop must be boolean!");
+        }
+        x.ifbody.accept(this);
+        x.elsebody.accept(this);
+        x.type=GlobalData.inheritGraph.lCA(x.ifbody.type, x.elsebody.type);
     }
 
+    /**
+     * let x.name : x.typeid (<- x.value) in x.body
+     * Checks:
+     * - x.typeid exists
+     * - if assignment then it is subtype of x.typeid
+     */
     @Override
     public void visit(AST.let x) {
+        x.value.accept(this);
+        GlobalData.scpTable.enterScope();
+        if(!GlobalData.inheritGraph.doesTypeExist(x.typeid)) {
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: TypeID: "+x.typeid+" doesn't exist!");
+            x.typeid="Object";
+        }
+        GlobalData.scpTable.insert(GlobalData.varMangledName(x.name, GlobalData.curClassName), x.typeid);
+        if(!x.value.type.equals(GlobalData.NOTYPE)) {
+            if (!GlobalData.inheritGraph.isSubType(x.value.type, x.typeid)) {
+                GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Invalid assignment from " +
+                        x.value.type + " to " + x.typeid + " !");
+            }
+        }
+        x.body.accept(this);
+        x.type = x.body.type;
 
+        GlobalData.scpTable.exitScope();
     }
 
     @Override
@@ -255,12 +299,36 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.typcase x) {
+        x.predicate.accept(this);
+        x.branches.get(0).accept(this);
+        String t1 = x.branches.get(0).type;
 
+        List<String> typesFound = new ArrayList<>();
+        typesFound.add(x.branches.get(0).type);
+
+        Iterator<AST.branch> branchIterator = x.branches.iterator();
+        for(; branchIterator.hasNext(); ){
+            AST.branch br = branchIterator.next();
+            if(typesFound.contains(br.type)){
+                GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Duplicate Variable Type: "+br.type+" " +
+                        "found in case statement!");
+            }
+            br.accept(this);
+            t1 = GlobalData.inheritGraph.lCA(t1, br.value.type);
+        }
+        x.type=t1;
     }
 
     @Override
     public void visit(AST.branch x) {
-
+        GlobalData.scpTable.enterScope();
+        if(!GlobalData.inheritGraph.doesTypeExist(x.type)){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Type "+ x.type+" does not exist!");
+            x.type="Object";
+        }
+        GlobalData.scpTable.insert(x.name, x.type);
+        x.value.accept(this);
+        GlobalData.scpTable.exitScope();
     }
 
     @Override
@@ -286,6 +354,12 @@ public class TypeCheckVisitor implements Visitor{
     @Override
     public void visit(AST.class_ x) {
         GlobalData.curFileName = x.filename;
+        GlobalData.curClassName = x.name;
+        GlobalData.scpTable.insert("self", x.name);
+
+        // Do stuff
+
+        GlobalData.scpTable.removeKey("self");
     }
 
     @Override
