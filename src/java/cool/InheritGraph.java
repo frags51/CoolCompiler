@@ -35,7 +35,7 @@ public class InheritGraph{
         /* Run on the classList for populating the map for obtaining parent-child references */
         // Run this from Semantic
         //populateAndLink();
-        
+        GlobalData.inheritGraph = this;
     }
 
     boolean inValidInheritanceGraph(){
@@ -190,5 +190,28 @@ public class InheritGraph{
     private boolean isInheritableClass(String clName){
         if(clName.equals("Int") || clName.equals("String") || clName.equals("Bool")) return false;
         return true;
+    }
+
+    /**
+     * Does t exist?
+     * @param t The type
+     * @return true if it exists
+     */
+    public boolean doesTypeExist(String t){
+        return map.get(t)!=null;
+    }
+
+    /**
+     * Is t1 a subtype of t2? Assume both these types exist
+     * @param t1 Type to be checked for subtype
+     * @param t2 The type to be checked for supertype
+     * @return True if t1 is a subtype of t2.
+     */
+    public boolean isSubType(String t1, String t2){
+        do{
+            if(t1.equals("Object") || t1.equals(t2)) break;
+            t1 = map.get(t1).parent;
+        } while(true);
+        return t1.equals(t2);
     }
 } // Class ends

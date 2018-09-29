@@ -28,7 +28,7 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.object x) {
-        String typGot = GlobalData.scpTable.lookUpGlobal(x.name);
+        String typGot = GlobalData.scpTable.lookUpGlobal(GlobalData.varMangledName(x.name, GlobalData.curClassName));
         if(typGot==null) {
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: "+x.name+" not declared!");
             x.type= "Object";
@@ -184,19 +184,48 @@ public class TypeCheckVisitor implements Visitor{
         x.type="Bool";
     }
 
+    /**
+     * x.typeID should be checked for in the symbol table.
+     * @param x
+     */
     @Override
     public void visit(AST.new_ x) {
-        x.type = x.typeid;
+        boolean exists = GlobalData.inheritGraph.doesTypeExist(x.typeid);
+        if(!exists) {
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Invalid new expr. Type "+x.typeid+" does not exist!");
+            x.type = "Object";
+        }
+        else x.type = x.typeid;
     }
 
+    /**
+     * x.name <- x.e1
+     * Change to Mangled NAME!!
+     * @param x
+     */
     @Override
     public void visit(AST.assign x) {
-
+        String t1 = GlobalData.scpTable.lookUpGlobal(GlobalData.varMangledName(x.name, GlobalData.curClassName));
+        if(t1 == null){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Declaration of "+x.name+" not found!");
+            x.type="Object";
+            // Type check this expression though.
+            x.e1.accept(this);
+        }
+        else{ //t1!=null
+            x.e1.accept(this);
+            if(!GlobalData.inheritGraph.isSubType(x.e1.type, t1)){
+                GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Type "+x.e1.type+" can't be assigned to variable" +
+                        "of type: "+t1+"!");
+                x.type = "Object";
+            }
+            else x.type = x.e1.type;
+        }
     }
 
     @Override
     public void visit(AST.block x) {
-
+        
     }
 
     @Override
