@@ -32,7 +32,6 @@ public class InheritGraph{
         // Add base Classes now. Can do some other parsing etc if needed before.
         this.addBaseClassesToGraph();
 
-        System.out.println(" >> "+ (classList.size()==program.classes.size()));
         numClasses = classList.size();
 
         /* Run on the classList for populating the map for obtaining parent-child references */
