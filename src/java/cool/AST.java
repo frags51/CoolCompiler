@@ -570,7 +570,10 @@ public class AST{
 			name = another.name; // you can access
 			filename = another.filename;
 			parent = another.parent;
-			features = another.features;
+			//
+			// In case an AST with parent features info in child classes is needed, just make a shallow copy: features = another.features
+			//
+			features = new ArrayList<>(another.features);
 			lineNo = another .lineNo;
 		}
 		String getString(String space){
