@@ -36,7 +36,7 @@ public class InheritGraph{
         /* Run on the classList for populating the map for obtaining parent-child references */
         // Run this from Semantic
         //populateAndLink();
-        
+        GlobalData.inheritGraph = this;
     }
 
     public AST.class_ getRoot(){
@@ -201,6 +201,7 @@ public class InheritGraph{
         return true;
     }
 
+
     public void mangleNames(){
         for( String className : GlobalData.classCopy.keySet()) {
             AST.class_ currClass = map.get(className);
@@ -246,5 +247,45 @@ public class InheritGraph{
     }
 
 
+
+
+    /**
+     * Does t exist?
+     * @param t The type
+     * @return true if it exists
+     */
+    public boolean doesTypeExist(String t){
+        return map.get(t)!=null;
+    }
+
+    /**
+     * Is t1 a subtype of t2? Assume both these types exist
+     * @param t1 Type to be checked for subtype
+     * @param t2 The type to be checked for supertype
+     * @return True if t1 is a subtype of t2.
+     */
+    public boolean isSubType(String t1, String t2){
+        do{
+            if(t1.equals("Object") || t1.equals(t2)) break;
+            t1 = map.get(t1).parent;
+        } while(true);
+        return t1.equals(t2);
+    }
+
+    /**
+     * Least common ancestor of t1 and t2
+     */
+    public String lCA(String t1, String t2){
+        List<String> vis = new ArrayList<>();
+        while(!t1.equals("Object")) {
+            vis.add(t1);
+            t1 = map.get(t1).parent;
+        }
+        vis.add("Object");
+        while(!vis.contains(t2)){
+            t2 = map.get(t2).parent;
+        }
+        return t2;
+    }
 
 } // Class ends

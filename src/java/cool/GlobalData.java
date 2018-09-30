@@ -1,13 +1,17 @@
 package cool;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
+
+
 public class GlobalData{
     /**
      * Map of Scope Tables for each class.
      * Modify this data structure later.
      */
     public static cool.ScopeTable<String> scpTable = new ScopeTable<>();
+
     public static HashMap<String,String> nameMap = new HashMap();
 
 
@@ -17,8 +21,10 @@ public class GlobalData{
     public static String curFileName = "";
     public static String curClassName = "";
 
+
     /* For adding parent features to children */
     public static HashMap<String,AST.class_> classCopy;
+
     /**
      * The inheritance graph object.
      * Set in constructor of inheritgraph (Supposed to be singleton class).
@@ -33,6 +39,7 @@ public class GlobalData{
      */
 
     public static String varMangledName(String varName, String className){
+
         return nameMap.get(inheritGraph.getMangledKey(className,varName,false));
     }
 
@@ -71,5 +78,6 @@ public class GlobalData{
             }
         }
         return argTypes ;
+
     }
 }
