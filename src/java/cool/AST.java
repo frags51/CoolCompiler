@@ -571,7 +571,7 @@ public class AST{
 			filename = another.filename;
 			parent = another.parent;
 			features = another.features;
-			lineNo = another .lineNo
+			lineNo = another .lineNo;
 		}
 		String getString(String space){
 			String str;
