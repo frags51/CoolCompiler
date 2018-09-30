@@ -4,6 +4,9 @@ package cool;
 
 public class GlobalError{
 	final public static boolean DBG = false;
+
+	public  static boolean invalidIGraph=false;
+
 	private static boolean errorFlag = false;
 	public static void reportError(String filename, int lineNo, String error){
 		errorFlag = true;

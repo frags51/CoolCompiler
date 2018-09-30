@@ -9,7 +9,7 @@ public class VisitorImpl implements Visitor {
     public void visit(AST.program program){
         graph = new InheritGraph(program);
         if(graph.inValidInheritanceGraph()){
-		    // Do NO MORE SEMANTIC Analysis
+            GlobalError.invalidIGraph=true;
 			return;
 		}
 		GlobalData.classCopy = new HashMap<>();

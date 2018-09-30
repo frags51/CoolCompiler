@@ -18,6 +18,8 @@ public class Semantic{
 
 		Visitor declVisitor = new VisitorImpl();
 		program.accept(declVisitor);
+		this.setErrorFlag();
+		if(GlobalError.invalidIGraph) return;
 		Visitor typeChecker = new TypeCheckVisitor();
 		program.accept(typeChecker);
 		// NEED TO SET ERROR FLAG HERE!
