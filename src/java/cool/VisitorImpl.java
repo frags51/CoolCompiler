@@ -39,6 +39,7 @@ public class VisitorImpl implements Visitor {
 
     /*Implementation of visit class */
     public void visit(AST.class_ clas){
+        GlobalData.curClassName=clas.name;
         // Visit and Add in scope table
         for(int i = 0;i<2;i++) {
             /** Done twice to check for local same signatures in first run and report errors if found same.
@@ -73,6 +74,7 @@ public class VisitorImpl implements Visitor {
                         if(hasMainFunc==false) hasMainFunc = true;
                         else{
                             //THROW ERROR MULTIPLE MAIN FOUND
+                            GlobalError.reportError(GlobalData.curFileName, clas.lineNo, "ERROR: Multiple main() functions found!");
                         }
                     }
                 }
@@ -80,13 +82,20 @@ public class VisitorImpl implements Visitor {
         if (hasMainFunc == true) {
             if(clas.name.equals("Main")) {}
             else {
-            /*THROW ERROR*/}
+                /*THROW ERROR*/
+                GlobalError.reportError(GlobalData.curFileName, clas.lineNo, "ERROR: main() function found in class " + clas.name + "!");
+            }
         }
-        else if(clas.name.equals("Main"){/*REPORT NO MAIN IN MAIN CLASS*/}
+        else if(clas.name.equals("Main")){
+            /*REPORT NO MAIN IN MAIN CLASS*/
+            GlobalError.reportError(GlobalData.curFileName, clas.lineNo, "ERROR: No main() in Main class!");
+        }
 
+        /*
         for(AST.feature f : clas.features){
             f.accept(this);
         }
+        */
 
     }
 
@@ -127,13 +136,17 @@ public class VisitorImpl implements Visitor {
                 GlobalData.scpTable.insert(key, GlobalData.nameMap.get(key));
             } else {
                 // already defined
-                if(i==0){/* REPORT LOCAL REDEFINITION ERROR */}
+                if(i==0){
+                    /* REPORT LOCAL REDEFINITION ERROR */
+                    GlobalError.reportError(GlobalData.curFileName, attr.lineNo, "ERROR: Multiple definitions of "+attr.name+"!");
+                }
                 else {/* REPORT PARENT CLASH ERROR */}
-                GlobalError.reportError(GlobalData.curFileName, graph.map.get(GlobalData.curClassName).lineNo, " Attribute refifintion");
+                GlobalError.reportError(GlobalData.curFileName, graph.map.get(GlobalData.curClassName).lineNo, "ERROR: Attribute: " + attr.name + " redefined in inherited class!");
             }
         }
         else{
             /* REPORT TYPE UNDEFINED ERROR */
+            GlobalError.reportError(GlobalData.curFileName, attr.lineNo, "ERROR: Type "+attr.typeid+" is not defined!");
         }
     }
 
@@ -146,13 +159,16 @@ public class VisitorImpl implements Visitor {
                 if(i==0){
 
                     //ERROR LOCAL DEFINITION REPEAT
+                    GlobalError.reportError(GlobalData.curFileName, method.lineNo, "ERROR: Multiple definitions of "+method.name+"!");
                 }
                 else if(GlobalData.nameMap.get(key).equals(GlobalData.scpTable.lookUpGlobal(key))){
                     //ALL OK REDEFINTIONS
                     // NOT overwriting to symbol table as parent is added later so it need not overwrite child method
+
                 }
                 else{
                     //ERROR INCORRECT DEFINITIONS
+                    GlobalError.reportError(GlobalData.curFileName, method.lineNo, "ERROR: incorrect override of "+method.name+" in inherited class!");
                 }
             }
             else{
@@ -162,18 +178,143 @@ public class VisitorImpl implements Visitor {
 
         else{
             //REPORT TYPE MISMATCH
+            GlobalError.reportError(GlobalData.curFileName, method.lineNo, "ERROR: Multiple definitions of "+method.name+"!");
         }
+    }
+
+    @Override
+    public void visit(AST.ASTNode x) {
+
+    }
+
+    @Override
+    public void visit(AST.expression x) {
+
+    }
+
+    @Override
+    public void visit(AST.no_expr x) {
+
+    }
+
+    @Override
+    public void visit(AST.string_const x) {
+
+    }
+
+    @Override
+    public void visit(AST.int_const x) {
+
+    }
+
+    @Override
+    public void visit(AST.object x) {
+
+    }
+
+    @Override
+    public void visit(AST.comp x) {
+
+    }
+
+    @Override
+    public void visit(AST.eq x) {
+
+    }
+
+    @Override
+    public void visit(AST.leq x) {
+
+    }
+
+    @Override
+    public void visit(AST.lt x) {
+
+    }
+
+    @Override
+    public void visit(AST.neg x) {
+
+    }
+
+    @Override
+    public void visit(AST.divide x) {
+
+    }
+
+    @Override
+    public void visit(AST.mul x) {
+
+    }
+
+    @Override
+    public void visit(AST.sub x) {
+
+    }
+
+    @Override
+    public void visit(AST.plus x) {
+
+    }
+
+    @Override
+    public void visit(AST.isvoid x) {
+
+    }
+
+    @Override
+    public void visit(AST.new_ x) {
+
+    }
+
+    @Override
+    public void visit(AST.assign x) {
+
+    }
+
+    @Override
+    public void visit(AST.block x) {
+
+    }
+
+    @Override
+    public void visit(AST.loop x) {
+
+    }
+
+    @Override
+    public void visit(AST.cond x) {
+
+    }
+
+    @Override
+    public void visit(AST.let x) {
+
+    }
+
+    @Override
+    public void visit(AST.dispatch x) {
+
+    }
+
+    @Override
+    public void visit(AST.static_dispatch x) {
+
+    }
+
+    @Override
+    public void visit(AST.typcase x) {
+
+    }
+
+    @Override
+    public void visit(AST.branch x) {
+
     }
 
     public void visit(AST.formal form) {
 
-        if (!GlobalData.inheritGraph.hasClass(form.typeid)) {
-            // using undefined type
-            //REPORT ERROR
-        } else {
-            // valid type
-            GlobalData.scpTable.insert(form.name, form.typeid);
-        }
+
     }
 
 
