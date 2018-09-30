@@ -8,7 +8,7 @@ class MainB inherits IO {
 
 class B inherits A {
   
-  a : Int;
+  c : Int;
 };
 
 class A {
@@ -18,6 +18,3 @@ class A {
   }};
 };
 
-class A{
-  d : Int;
-};

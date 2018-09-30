@@ -1,4 +1,5 @@
 package cool;
+import cool.GlobalData.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -200,6 +201,54 @@ public class InheritGraph{
         return true;
     }
 
+
+    public void mangleNames(){
+        for( String className : GlobalData.classCopy.keySet()) {
+            AST.class_ currClass = map.get(className);
+            for (AST.feature f : currClass.features) {
+                if (f instanceof AST.method) {
+                    AST.method m = (AST.method) f;
+                    GlobalData.nameMap.put(getMangledKey(currClass.name, m.name, true), getMethodMangledValue(m.formals, m.typeid));
+                } else {
+                    AST.attr atr = (AST.attr) f;
+                    GlobalData.nameMap.put(getMangledKey(currClass.name, atr.name, false), atr.typeid);
+                }
+            }
+        }
+
+
+    }
+
+
+    // "_{A/M}_{cl_length}{cl_name}{method_length}{method_name} -> {arg_length}_{ {typelength}{arg_type}list}_{ret_type}
+
+    public String getMangledKey(String className, String function, boolean isMethod){
+        StringBuilder mangledNameBuilder = new StringBuilder();
+        if(isMethod) mangledNameBuilder.append("_M_");
+        else mangledNameBuilder.append("_A_");
+        mangledNameBuilder.append(className.length()).append(className);
+        mangledNameBuilder.append(function.length()).append(function);
+        return mangledNameBuilder.toString();
+    }
+
+
+    private String getMethodMangledValue(List<AST.formal> formals, String ret ){
+        StringBuilder mangledValueBuilder = new StringBuilder();
+        mangledValueBuilder.append(formals.size()).append("_");
+        for(AST.formal formal : formals){
+            mangledValueBuilder.append(formal.typeid.length()).append(formal.typeid);
+        }
+        mangledValueBuilder.append("&").append(ret);
+        return mangledValueBuilder.toString();
+    }
+    public boolean hasClass(String curr){
+        if(map.containsKey(curr)) return true;
+        else return false;
+    }
+
+
+
+
     /**
      * Does t exist?
      * @param t The type
@@ -238,4 +287,5 @@ public class InheritGraph{
         }
         return t2;
     }
+
 } // Class ends
