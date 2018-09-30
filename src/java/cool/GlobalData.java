@@ -12,7 +12,7 @@ public class GlobalData{
      */
     public static cool.ScopeTable<String> scpTable = new ScopeTable<>();
 
-    public static HashMap<String,String> nameMap = new HashMap();
+    public static HashMap<String,String> nameMap = new HashMap<>();
 
 
     /**
