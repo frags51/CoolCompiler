@@ -291,7 +291,7 @@ public class TypeCheckVisitor implements Visitor{
     public void visit(AST.dispatch x) {
         x.caller.accept(this);
         String callerType = x.caller.type;
-        String fRetType = GlobalData.scpTable.lookUpGlobal(GlobalData.funMangledName(x.name, callerType));
+        String fRetType = GlobalData.getReturnType(GlobalData.funMangledName(x.name, callerType));
         if(fRetType==null){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Function "+x.name+" not declared!");
             x.type = "Object";
@@ -330,7 +330,7 @@ public class TypeCheckVisitor implements Visitor{
             x.type="Object";
             return;
         }
-        String fRetType = GlobalData.scpTable.lookUpGlobal(GlobalData.funMangledName(x.name, callerType));
+        String fRetType = GlobalData.getReturnType(GlobalData.funMangledName(x.name, callerType));
         if(fRetType==null){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Function "+x.name+" not declared!");
             x.type = "Object";

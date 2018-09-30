@@ -47,7 +47,13 @@ public class GlobalData{
         return nameMap.get(inheritGraph.getMangledKey(className,funName,true));
     }
 
+    /**
+     *
+     * @param funName : Mangled name of function
+     * @return List of argument types
+     */
     public static List<String> argTypesFromFun(String funName){
+
         String argList = nameMap.get(funName);
         ArrayList<String> argTypes = new ArrayList<>();
         int lengthArgList = 0;
@@ -79,5 +85,17 @@ public class GlobalData{
         }
         return argTypes ;
 
+    }
+
+
+    public static String getReturnType(String mangledName){
+        String mapped = nameMap.get(mangledName);
+        for(int i=0;i<mapped.length();i++){
+            if(mapped.charAt(i) == '&'){
+                return mapped.substring(i+1);
+            }
+        }
+        // will never be executed hopefi;ly
+        return null;
     }
 }
