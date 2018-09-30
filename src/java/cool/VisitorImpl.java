@@ -13,12 +13,13 @@ public class VisitorImpl implements Visitor {
 			return;
 		}
 		GlobalData.classCopy = new HashMap<>();
-        graph.mangleNames();
 		for(AST.class_ curr: graph.classList){
 		    GlobalData.classCopy.put(curr.name, new AST.class_(curr));
         }
 
-		/* DFS starting off from Object */
+        graph.mangleNames();
+
+        /* DFS starting off from Object */
 		AST.class_ root = graph.getRoot();
 
 		/* DFS over child classes */
@@ -317,27 +318,9 @@ public class VisitorImpl implements Visitor {
 
     }
 
+    @Override
+    public void visit(AST.bool_const x) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }
 
     }

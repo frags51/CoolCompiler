@@ -40,11 +40,11 @@ public class GlobalData{
 
     public static String varMangledName(String varName, String className){
 
-        return nameMap.get(inheritGraph.getMangledKey(className,varName,false));
+        return (inheritGraph.getMangledKey(className,varName,false));
     }
 
     public static String funMangledName(String funName, String className){
-        return nameMap.get(inheritGraph.getMangledKey(className,funName,true));
+        return (inheritGraph.getMangledKey(className,funName,true));
     }
 
     /**
@@ -53,32 +53,36 @@ public class GlobalData{
      * @return List of argument types
      */
     public static List<String> argTypesFromFun(String funName){
-
+        if(GlobalError.DBG) System.out.println("DEBG: funName argtypes "+funName);
         String argList = nameMap.get(funName);
         ArrayList<String> argTypes = new ArrayList<>();
-        int lengthArgList = 0;
+        int lengthArgList = 0,counter =0;
         for(char letter : argList.toCharArray()) {
             if (Character.isDigit(letter)) {
                 lengthArgList = lengthArgList * 10;
                 lengthArgList += Character.getNumericValue(letter);
+                counter++;
             }
             else break;
         }
         if(lengthArgList == 0) {
             return null;
         }
+
         int argTypeLength = 0;
-        for(int i = lengthArgList+1; i< argList.length();i++){
+        for(int i = counter+1; i< argList.length() && argList.charAt(i)!='&';i++){
             if(Character.isDigit(argList.charAt(i))){
                 argTypeLength = argTypeLength * 10;
-                lengthArgList += Character.getNumericValue(argList.charAt(i));
+                argTypeLength += Character.getNumericValue(argList.charAt(i));
             }
             else{
                 StringBuilder attributeBuilder = new StringBuilder();
-                for(int j = i;j<i+lengthArgList;j++){
+                int j;
+                for(j = i;j<i+argTypeLength;j++){
+
                     attributeBuilder.append(argList.charAt(j));
-                    i = j;
                 }
+                i = j-1;
                 argTypes.add(attributeBuilder.toString());
                 argTypeLength = 0;
             }
@@ -90,12 +94,14 @@ public class GlobalData{
 
     public static String getReturnType(String mangledName){
         String mapped = nameMap.get(mangledName);
+
         for(int i=0;i<mapped.length();i++){
             if(mapped.charAt(i) == '&'){
                 return mapped.substring(i+1);
             }
         }
         // will never be executed hopefi;ly
+
         return null;
     }
 }

@@ -16,8 +16,10 @@ public class Semantic{
 	public Semantic(AST.program program){
 		//Write Semantic analyzer code here
 
-		Visitor visitor = new VisitorImpl();
-		program.accept(visitor);
+		Visitor declVisitor = new VisitorImpl();
+		program.accept(declVisitor);
+		Visitor typeChecker = new TypeCheckVisitor();
+		program.accept(typeChecker);
 		// NEED TO SET ERROR FLAG HERE!
 		this.setErrorFlag();
 	}

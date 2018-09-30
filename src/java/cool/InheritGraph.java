@@ -31,6 +31,8 @@ public class InheritGraph{
 
         // Add base Classes now. Can do some other parsing etc if needed before.
         this.addBaseClassesToGraph();
+
+        System.out.println(" >> "+ (classList.size()==program.classes.size()));
         numClasses = classList.size();
 
         /* Run on the classList for populating the map for obtaining parent-child references */
@@ -209,9 +211,12 @@ public class InheritGraph{
                 if (f instanceof AST.method) {
                     AST.method m = (AST.method) f;
                     GlobalData.nameMap.put(getMangledKey(currClass.name, m.name, true), getMethodMangledValue(m.formals, m.typeid));
+                    //System.out.println(getMangledKey(currClass.name, m.name, true)+ " ->" +getMethodMangledValue(m.formals, m.typeid) );
                 } else {
                     AST.attr atr = (AST.attr) f;
                     GlobalData.nameMap.put(getMangledKey(currClass.name, atr.name, false), atr.typeid);
+                    //System.out.println((getMangledKey(currClass.name, atr.name, false))+ " ->" +atr.typeid );
+
                 }
             }
         }

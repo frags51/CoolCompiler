@@ -22,6 +22,11 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.string_const x) {
+        x.type="String";
+    }
+
+    @Override
+    public void visit(AST.bool_const x) {
         x.type="Bool";
     }
 
@@ -290,6 +295,7 @@ public class TypeCheckVisitor implements Visitor{
     @Override
     public void visit(AST.dispatch x) {
         x.caller.accept(this);
+
         String callerType = x.caller.type;
         String fRetType = GlobalData.getReturnType(GlobalData.funMangledName(x.name, callerType));
         if(fRetType==null){
@@ -314,7 +320,8 @@ public class TypeCheckVisitor implements Visitor{
                         " but got: " + nextExpr.type );
             }
         }
-        if(actIt.hasNext() || typIt.hasNext()) GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: " +
+
+        if(x.actuals.size()!=argTypes.size()) GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: " +
                 "Mismatch in number of arguments to "+x.name);
 
         x.type = fRetType;
@@ -422,7 +429,8 @@ public class TypeCheckVisitor implements Visitor{
         for(AST.formal formal : x.formals){
             formal.accept(this);
         }
-        x.body.accept(this);
+        // body of out_string etc is null here
+        if(x.body!=null) x.body.accept(this);
         GlobalData.scpTable.exitScope();
 
     }
@@ -446,6 +454,7 @@ public class TypeCheckVisitor implements Visitor{
     public void visit(AST.class_ x) {
         GlobalData.curFileName = x.filename;
         GlobalData.curClassName = x.name;
+        if(GlobalError.DBG) System.out.println("In class: "+x.name);
         GlobalData.scpTable.insert(GlobalData.varMangledName("self", GlobalData.curClassName), x.name);
 
         // Evaluate each feature
