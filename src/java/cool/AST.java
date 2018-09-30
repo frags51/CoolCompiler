@@ -566,6 +566,13 @@ public class AST{
 			decl = false;
 			children = new ArrayList<String>();
 		}
+		public class_(class_ another) {
+			name = another.name; // you can access
+			filename = another.filename;
+			parent = another.parent;
+			features = another.features;
+			lineNo = another .lineNo
+		}
 		String getString(String space){
 			String str;
 			str = space+"#"+lineNo+"\n"+space+"_class\n"+space+sp+name+"\n"+space+sp+parent+"\n"+space+sp+"\""+filename+"\""+"\n"+space+sp+"(\n";

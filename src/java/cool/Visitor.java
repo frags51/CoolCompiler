@@ -1,6 +1,7 @@
 package cool;
 
 public interface Visitor {
+    /*
     void visit(AST.ASTNode x);
     void visit(AST.expression x);
     void visit(AST.no_expr x);
@@ -28,6 +29,7 @@ public interface Visitor {
     void visit(AST.typcase x);
     void visit(AST.branch x);
     void visit(AST.formal x);
+    */
     void visit(AST.feature x);
     void visit(AST.method x);
     void visit(AST.attr x);

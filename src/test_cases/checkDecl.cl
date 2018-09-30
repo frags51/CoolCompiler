@@ -8,10 +8,21 @@ class Main inherits IO {
 };
 
 class B inherits IO{
-    func() : IO {{
-        -- x : Int;
+    func(y : String) : IO {{
         x <- 5;
         out_int(x);
     }};
     x : Int <- 6;
+};
+
+class C inherits B{
+    y : String;
+    main : Int;
+    y() : Int{
+        2
+    };
+    func(y: String): IO{
+        out_int(2)
+    };
+
 };
