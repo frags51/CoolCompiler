@@ -61,8 +61,11 @@ in `Visitor.java`. The type checking is done in a bottom-up fashion,
 in the sense that type of child node(s) is determined before determining
 the type of the current node. The class `TypeCheckVisitor` implements
 this interface and does the type-checking. The process starts 
-by calling `AST.program.accept(an instance of TypeCheckVisitor)`. An
-AST.program node is the root of the AST.
+by calling `AST.program.accept(an instance of TypeCheckVisitor)`.
+ 
+ An
+AST.program node is the root of the AST. The type
+ environment is stored in `GlobalData`.
 
 Whenever a new name is introduced, it is checked if it is indeed possible to declare
 a new name in that expression, and if yes (for example in `AST.let` node), the value of scope is incremented by 1
@@ -108,8 +111,82 @@ type checking for those expressions is done, the value of scope
 is decremented and those names are removed (we exit the scope) 
 because they are no longer needed.
 
+The variable **self** is bound in every class implicitly - this 
+is done when the TypeCheckVisitor visits an `AST.class_` node.
+
+#### Entering and exiting a scope
++ All class features (attributes + methods) are stored in `scpTable`
+by their mangled name, at level 0. This level is persistent for 
+the whole semantic analysis, to support ease of implementation 
+of forward references.
++ Scope is increased  (entered) 
+on encountering functions, let expressions
+and branches of case expressions.
++ Scope is decreased (exited) on coming out of the above mentioned
+expressions, and any names are lost - they are not needed any 
+more.
++ All insertions into the scope table check if there is duplication 
+of names, and an error is printed then.
++ If any name is found, it is looked up in the scope table
+starting from the current scope and going to the outermost scope.
+If not found, an error is printed.
+
+### Name Mangling
+
+Name mangling means, storing extra information with names.
+We have mangled Class names along with attribute/method names.
+
+#### Reasons for name Mangling
++ For methods, provides an easy way to find the correct method 
+and match its signature with the given argument types. 
+Also, it can be checked easily if a dispatch is legal or not.
++ For attributes too it provides easy look up in accordance with 
+our persistent level-0 scope table design. It would also be easier
+to port this scope table to languages/extensions that allow 
+accessing of attributes from other classes, just like dispatch.
++ The names in inner expressions, like function formals, let and case
+are mangled to provide uniformity of code and ease of 
+implementation.
+
+### An overview of other used Classes
+
+#### AST
++ Contains definition of each node. 
++ Modified to implement `VisitableElement`.
++ Also modified to provide copy constructors for some nodes.
+
+#### GlobalError (For Error Handling)
++ To report errors from other classes, this class is used.
++ It provides static error reporting methods similar to those
+in Semantic.java, so we don't need to pass a reference to an
+object of Semantic class to report errors.
++ A debug flag, `DBG` is defined that can be used to print debug 
+messages.
+
+#### InheritGraph
++ Contains methods to form, and check for well-formed inheritance graph.
++ Contains methods to mangle class feature names and insert them
+into the global scope table.
++ Contains methods to check if a typename exists in the classlist.
++ Contains methods to find Least Common Ancestor type and to check
+if a type is subtype of another.
+
+#### Semantic
++ This just has a driver method that calls the accept function 
+of the `AST.program` node on the two visitors.
++ Also, it checks for error messages reported by `GlobalError` 
+and sets its error flag accordingly, which is required by the
+Semantic analyzer to exit.
+
+## Testing
+
+We have included some test cases. Bad test cases (error producing)
+are named `bad*.cl`. Good test cases are all the other files.
+
+We have tried to break/test each rule of COOL. What a test case is 
+supposed to do is commented in that file.
+
+
 + Parent of object is null
 + Class Inheritance: In case parent class is not declared 
 or parent is a non inheritable class, parent is set to object.
-+ The context for typechecking is saved in GlobalData as 
-static variables.
