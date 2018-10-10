@@ -77,9 +77,38 @@ recover, for semantic check in the rest of the file. An example is we give the t
 enabling further semantic checks, it is given, for example in arithmetic expressions
 `int` type is given (Issue #11 on Github).
 
+This is the final pass of the semantic analysis. If no errors were found, 
+a type annotated AST should be output. If not, a set of error messages
+will be output.
+
+### Scope Table 
+
+The provided implementation of the scope table is used. The scope table
+`GlobalData.scpTable` is a hashmap, mapping mangled names of attributes
+to their types and mangled name of methods to a string that stores 
+its argument types and return type.
+
+Only one scope table is used. At _level 0_, the scope table stores 
+all the features (attributes+methods) of all the classes, mangled with 
+the class name. This scope is not exited at any time, so 
+these entries stay intact during all of the semantic analysis.
+This was done to ease the lookup of class fields when accessed 
+from another class (only methods allowed in cool via dispatch, but
+attribute names also mangled to have a **modular** code that might possibly
+be re-used for some language that allows attributes to be accessed 
+from other classes too).
+
+For ease of implementation, any variables (names) declared in let,
+formal arguments, etc are also mangled with the current class
+ name.
+Whenever such expressions are encountered, the value of scope 
+is incremented 
+by 1, and then those names are added to the scope table. Once
+type checking for those expressions is done, the value of scope
+is decremented and those names are removed (we exit the scope) 
+because they are no longer needed.
 
 + Parent of object is null
-+ Type of copy() etc is "Object" for now.
 + Class Inheritance: In case parent class is not declared 
 or parent is a non inheritable class, parent is set to object.
 + The context for typechecking is saved in GlobalData as 
