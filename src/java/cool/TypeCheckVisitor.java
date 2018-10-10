@@ -217,6 +217,11 @@ public class TypeCheckVisitor implements Visitor{
      */
     @Override
     public void visit(AST.assign x) {
+        if(x.name.equals("self")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Can't assign to "+x.name+"!");
+            x.type="Object";
+            x.e1.accept(this);
+        }
         String t1 = GlobalData.scpTable.lookUpGlobal(GlobalData.varMangledName(x.name, GlobalData.curClassName));
         if(t1 == null){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Declaration of "+x.name+" not found!");
@@ -276,6 +281,9 @@ public class TypeCheckVisitor implements Visitor{
      */
     @Override
     public void visit(AST.let x) {
+        if(x.name.equals("self")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Self can't be bound in let expr!");
+        }
         x.value.accept(this);
         GlobalData.scpTable.enterScope();
         if(!GlobalData.inheritGraph.doesTypeExist(x.typeid)) {
@@ -399,6 +407,9 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.branch x) {
+        if(x.name.equals("self")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Can't bind "+x.name+" in a 'case' Statement!");
+        }
         GlobalData.scpTable.enterScope();
         if(!GlobalData.inheritGraph.doesTypeExist(x.type)){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Type "+ x.type+" does not exist!");
@@ -415,6 +426,9 @@ public class TypeCheckVisitor implements Visitor{
      */
     @Override
     public void visit(AST.formal x) {
+        if(x.name.equals("self")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: "+x.name+" can't be a formal argument name!");
+        }
         if(!GlobalData.inheritGraph.doesTypeExist(x.typeid)){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Type "+ x.typeid+" doesn't exist!");
             x.typeid="Object";
@@ -455,6 +469,10 @@ public class TypeCheckVisitor implements Visitor{
      */
     @Override
     public void visit(AST.attr x) {
+        if(x.name.equals("self")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Can't define "+x.name+" as an attribute!");
+            return;
+        }
         x.value.accept(this);
         if(!x.value.type.equals(GlobalData.NOTYPE)) {
             if (!GlobalData.inheritGraph.isSubType(x.value.type, x.typeid)) {
