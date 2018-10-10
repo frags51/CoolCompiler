@@ -1,3 +1,4 @@
+
 -- Check for redefinition of methods/attrs in same class
 
 
@@ -15,3 +16,4 @@ class Main inherits IO {
           out_string("hello")
      };
 };
+
