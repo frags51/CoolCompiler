@@ -1,4 +1,4 @@
--- Check for wrong definition of in Main class
+-- Check for wrong definition of main function in Main class
 class A {
     a : Int;
 };

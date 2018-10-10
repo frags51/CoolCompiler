@@ -56,7 +56,7 @@ public class TypeCheckVisitor implements Visitor{
     public void visit(AST.comp x) {
         x.e1.accept(this); // Generate type for its subexpression, which must be int
         if(!x.e1.type.equals("Bool")) {
-            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: "+": Complement is defined only on Ints!");
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: "+": Complement is defined only on Bools!");
             x.type="Bool"; // Continue Checks
         }
         else x.type="Bool";
