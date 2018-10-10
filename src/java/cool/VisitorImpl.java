@@ -1,6 +1,9 @@
 package cool;
 import java.util.HashMap;
 import java.util.HashSet;
+
+//import jdk.nashorn.internal.objects.Global;
+
 import java.util.ArrayList;
 public class VisitorImpl implements Visitor {
     public InheritGraph graph;
@@ -17,22 +20,39 @@ public class VisitorImpl implements Visitor {
 		    GlobalData.classCopy.put(curr.name, new AST.class_(curr));
         }
 
-        graph.mangleNames();
+
+
 
         /* DFS starting off from Object */
 		AST.class_ root = graph.getRoot();
 
 		/* DFS over child classes */
         classDFS(root);
+
     }
 
     /*Preorder DFS for updating parent first*/
     public void classDFS(AST.class_ currClass){
+        graph.mangleNames(currClass.name);
         currClass.accept(this);
 
         for( String child : currClass.children){
             for(AST.feature ftr : currClass.features){
-                GlobalData.classCopy.get(child).features.add(ftr);
+                /* Checks whether to change return type or not*/
+                boolean flag = true;
+                if(ftr instanceof AST.method){
+                    /* Handle self types in case of IO method calls*/
+                    AST.method mthd = (AST.method) ftr;
+                    if(mthd.name.equals("copy") || mthd.name.equals("out_string") || mthd.name.equals("out_int")){
+                        //((AST.method)ftr).typeid = c;
+                        //if(GlobalError.DBG) System.out.println("ADDED>>"+mthd.name);
+                        AST.method selfCopy = new AST.method(mthd);
+                        selfCopy.typeid = child;
+                        GlobalData.classCopy.get(child).features.add(selfCopy);
+                        flag = false;
+                    }
+                }
+                if(flag) GlobalData.classCopy.get(child).features.add(ftr);
             }
             classDFS(graph.map.get(child));
         }
@@ -154,6 +174,16 @@ public class VisitorImpl implements Visitor {
 
 
     public void checkMethod(AST.method method,int i){
+        /* Check main method */
+        if(method.name.equals("main")){
+            if(!method.formals.isEmpty()){
+                GlobalError.reportError(GlobalData.curFileName, method.lineNo, "Main formal arguments not empty!");
+            }
+        }
+
+
+
+
         if(graph.hasClass(method.typeid)) {
             String key = graph.getMangledKey(GlobalData.curClassName, method.name, true);
             if(GlobalData.scpTable.lookUpGlobal(key) != null){
@@ -173,6 +203,7 @@ public class VisitorImpl implements Visitor {
                 }
             }
             else{
+                //if(GlobalError.DBG) System.out.println("CHECK >> "+key+" | "+GlobalData.nameMap.get(key));
                 GlobalData.scpTable.insert(key, GlobalData.nameMap.get(key));
             }
         }
