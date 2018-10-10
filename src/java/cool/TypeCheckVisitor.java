@@ -56,7 +56,7 @@ public class TypeCheckVisitor implements Visitor{
     public void visit(AST.comp x) {
         x.e1.accept(this); // Generate type for its subexpression, which must be int
         if(!x.e1.type.equals("Bool")) {
-            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: "+": Complement is defined only on Ints!");
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: "+": Complement is defined only on Bools!");
             x.type="Bool"; // Continue Checks
         }
         else x.type="Bool";
@@ -217,6 +217,11 @@ public class TypeCheckVisitor implements Visitor{
      */
     @Override
     public void visit(AST.assign x) {
+        if(x.name.equals("self")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Can't assign to "+x.name+"!");
+            x.type="Object";
+            x.e1.accept(this);
+        }
         String t1 = GlobalData.scpTable.lookUpGlobal(GlobalData.varMangledName(x.name, GlobalData.curClassName));
         if(t1 == null){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Declaration of "+x.name+" not found!");
@@ -276,6 +281,9 @@ public class TypeCheckVisitor implements Visitor{
      */
     @Override
     public void visit(AST.let x) {
+        if(x.name.equals("self")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Self can't be bound in let expr!");
+        }
         x.value.accept(this);
         GlobalData.scpTable.enterScope();
         if(!GlobalData.inheritGraph.doesTypeExist(x.typeid)) {
@@ -300,7 +308,7 @@ public class TypeCheckVisitor implements Visitor{
         x.caller.accept(this);
 
         String callerType = x.caller.type;
-        //if(GlobalError.DBG) System.out.println("ADDED>>"+callerType+" | "+GlobalData.funMangledName(x.name, callerType));
+        if(GlobalError.DBG) System.out.println("ADDED>>"+callerType+" | "+GlobalData.funMangledName(x.name, callerType));
 
         String fRetType = GlobalData.getReturnType(GlobalData.funMangledName(x.name, callerType));
         if(fRetType==null){
@@ -399,6 +407,9 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.branch x) {
+        if(x.name.equals("self")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Can't bind "+x.name+" in a 'case' Statement!");
+        }
         GlobalData.scpTable.enterScope();
         if(!GlobalData.inheritGraph.doesTypeExist(x.type)){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Type "+ x.type+" does not exist!");
@@ -415,6 +426,9 @@ public class TypeCheckVisitor implements Visitor{
      */
     @Override
     public void visit(AST.formal x) {
+        if(x.name.equals("self")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: "+x.name+" can't be a formal argument name!");
+        }
         if(!GlobalData.inheritGraph.doesTypeExist(x.typeid)){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Type "+ x.typeid+" doesn't exist!");
             x.typeid="Object";
@@ -439,7 +453,13 @@ public class TypeCheckVisitor implements Visitor{
             formal.accept(this);
         }
         // body of out_string etc is null here
-        if(x.body!=null) x.body.accept(this);
+        if(x.body!=null) {
+            x.body.accept(this);
+            if(!GlobalData.inheritGraph.isSubType(x.body.type, x.typeid)) {
+                GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR! Function's body's type: "
+                        + x.body.type + " does not conform with function's return type: "+ x.typeid);
+            }
+        }
         GlobalData.scpTable.exitScope();
 
     }
@@ -449,6 +469,10 @@ public class TypeCheckVisitor implements Visitor{
      */
     @Override
     public void visit(AST.attr x) {
+        if(x.name.equals("self")){
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Can't define "+x.name+" as an attribute!");
+            return;
+        }
         x.value.accept(this);
         if(!x.value.type.equals(GlobalData.NOTYPE)) {
             if (!GlobalData.inheritGraph.isSubType(x.value.type, x.typeid)) {

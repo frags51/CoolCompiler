@@ -1,16 +1,19 @@
-class B{
-    b:Int;
-    b:
+
+-- Check for redefinition of methods/attrs in same class
+
+
+class A {
+    a : Int;
+    a: String;
+    b(c: Int): String {"F"};
+    b (c: String) : String {"G"};
 };
 
-class A{
-    b: Int;
-    b: String;
-};
-class Main inherits B{
-    main():Int{
-        2
-    };
-    b : Int;
+
+
+class Main inherits IO {
+    main() : Object {
+          out_string("hello")
+     };
 };
 

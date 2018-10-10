@@ -1,4 +1,4 @@
--- Check for non inheritable and non defined parents.
+-- Check for non inheritable (IO, Int etc) and non defined parents.
 class A inherits Bullshit{
     a : Int;
 };
