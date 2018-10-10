@@ -446,6 +446,9 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.method x) {
+
+
+
         GlobalData.scpTable.enterScope();
 
         // Add these into the symbol table

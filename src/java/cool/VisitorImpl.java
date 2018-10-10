@@ -210,7 +210,7 @@ public class VisitorImpl implements Visitor {
 
         else{
             //REPORT TYPE MISMATCH
-            GlobalError.reportError(GlobalData.curFileName, method.lineNo, "ERROR: Multiple definitions of "+method.name+"!");
+            GlobalError.reportError(GlobalData.curFileName, method.lineNo, "ERROR: TypeID: " + method.typeid + " of "+method.name+" not found!");
         }
     }
 
