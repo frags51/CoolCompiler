@@ -439,7 +439,13 @@ public class TypeCheckVisitor implements Visitor{
             formal.accept(this);
         }
         // body of out_string etc is null here
-        if(x.body!=null) x.body.accept(this);
+        if(x.body!=null) {
+            x.body.accept(this);
+            if(!GlobalData.inheritGraph.isSubType(x.body.type, x.typeid)) {
+                GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR! Function's body's type: "
+                        + x.body.type + " does not conform with function's return type: "+ x.typeid);
+            }
+        }
         GlobalData.scpTable.exitScope();
 
     }
