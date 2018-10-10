@@ -54,11 +54,11 @@ public class TypeCheckVisitor implements Visitor{
     @Override
     public void visit(AST.comp x) {
         x.e1.accept(this); // Generate type for its subexpression, which must be int
-        if(!x.e1.type.equals("Int")) {
+        if(!x.e1.type.equals("Bool")) {
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: "+": Complement is defined only on Ints!");
-            x.type="Int"; // Continue Checks
+            x.type="Bool"; // Continue Checks
         }
-        else x.type="Int";
+        else x.type="Bool";
     }
 
     /**
@@ -126,11 +126,11 @@ public class TypeCheckVisitor implements Visitor{
     public void visit(AST.neg x) {
         x.e1.accept(this);
         String t1 = x.e1.type;
-        if(!t1.equals("Bool")){
+        if(!t1.equals("Int")){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Invalid Negation of type: "+t1+"!");
-            x.type="Bool";
+            x.type="Int";
         }
-        else x.type="Bool";
+        else x.type="Int";
     }
 
     @Override
