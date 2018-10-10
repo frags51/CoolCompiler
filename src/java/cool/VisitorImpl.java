@@ -193,7 +193,7 @@ public class VisitorImpl implements Visitor {
                 }
             }
             else{
-                if(GlobalError.DBG) System.out.println("CHECK >> "+key+" | "+GlobalData.nameMap.get(key));
+                //if(GlobalError.DBG) System.out.println("CHECK >> "+key+" | "+GlobalData.nameMap.get(key));
                 GlobalData.scpTable.insert(key, GlobalData.nameMap.get(key));
             }
         }

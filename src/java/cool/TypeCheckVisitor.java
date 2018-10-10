@@ -17,6 +17,7 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.no_expr x) {
+        x.type=GlobalData.NOTYPE;
         ; // Do nothing for this type check.
     }
 
@@ -37,6 +38,7 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.object x) {
+
         String typGot = GlobalData.scpTable.lookUpGlobal(GlobalData.varMangledName(x.name, GlobalData.curClassName));
         if(typGot==null) {
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: "+x.name+" not declared!");
@@ -375,16 +377,18 @@ public class TypeCheckVisitor implements Visitor{
         String t1 = x.branches.get(0).type;
 
         List<String> typesFound = new ArrayList<>();
-        typesFound.add(x.branches.get(0).type);
-
+        AST.branch br;
         Iterator<AST.branch> branchIterator = x.branches.iterator();
         for(; branchIterator.hasNext(); ){
-            AST.branch br = branchIterator.next();
+
+            br = branchIterator.next();
+            br.accept(this);
+
             if(typesFound.contains(br.type)){
                 GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Duplicate Variable Type: "+br.type+" " +
                         "found in case statement!");
             }
-            br.accept(this);
+            typesFound.add(br.type);
             t1 = GlobalData.inheritGraph.lCA(t1, br.value.type);
         }
         x.type=t1;
@@ -397,7 +401,7 @@ public class TypeCheckVisitor implements Visitor{
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Type "+ x.type+" does not exist!");
             x.type="Object";
         }
-        GlobalData.scpTable.insert(x.name, x.type);
+        GlobalData.scpTable.insert(GlobalData.varMangledName(x.name, GlobalData.curClassName), x.type);
         x.value.accept(this);
         GlobalData.scpTable.exitScope();
     }
@@ -456,7 +460,7 @@ public class TypeCheckVisitor implements Visitor{
     public void visit(AST.class_ x) {
         GlobalData.curFileName = x.filename;
         GlobalData.curClassName = x.name;
-        if(GlobalError.DBG) System.out.println("In class: "+x.name);
+        //if(GlobalError.DBG) System.out.println("In class: "+x.name);
         GlobalData.scpTable.insert(GlobalData.varMangledName("self", GlobalData.curClassName), x.name);
 
         // Evaluate each feature
