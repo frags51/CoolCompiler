@@ -1,6 +1,9 @@
 package cool;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import jdk.nashorn.internal.objects.Global;
+
 import java.util.ArrayList;
 public class VisitorImpl implements Visitor {
     public InheritGraph graph;
@@ -32,7 +35,20 @@ public class VisitorImpl implements Visitor {
 
         for( String child : currClass.children){
             for(AST.feature ftr : currClass.features){
-                GlobalData.classCopy.get(child).features.add(ftr);
+                /* Checks whether to change return type or not*/
+                boolean flag = true;
+                if(ftr instanceof AST.method){
+                    /* Handle self types in case of IO method calls*/
+                    AST.method mthd = (AST.method) ftr;
+                    if(mthd.name.equals("copy") || mthd.name.equals("out_string") || mthd.name.equals("out_int")){
+                        //((AST.method)ftr).typeid = c;
+                        AST.method selfCopy = new AST.method(mthd);
+                        selfCopy.typeid = child;
+                        GlobalData.classCopy.get(child).features.add(selfCopy);
+                        flag = false;
+                    }
+                }
+                if(flag) GlobalData.classCopy.get(child).features.add(ftr);
             }
             classDFS(graph.map.get(child));
         }

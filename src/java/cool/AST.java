@@ -504,11 +504,17 @@ public class AST{
 		public String typeid;
 		public expression body;
 		public method(String n, List<formal> f, String t, expression b, int l){
-			name = n;
+			name = n;			
 			formals = f;
 			typeid = t;
 			body = b;
 			lineNo = l;
+		}
+		public method(method x){
+			name = x.name;
+			formals = new ArrayList<>(x.formals);
+			typeid = new String(x.typeid);
+			body = x.body;
 		}
 		String getString(String space){
 			String str = space+"#"+lineNo+"\n"+space+"_method\n"+space+sp+name+"\n";
