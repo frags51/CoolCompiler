@@ -17,8 +17,9 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.no_expr x) {
-        x.type=GlobalData.NOTYPE;
-        ; // Do nothing for this type check.
+
+        x.type = GlobalData.NOTYPE; // Do nothing for this type check.
+
     }
 
     @Override
