@@ -512,7 +512,7 @@ public class AST{
 		}
 		public method(method x){
 			name = x.name;
-			formals = new ArrayList<>(x.formals);
+			formals = x.formals;
 			typeid = new String(x.typeid);
 			body = x.body;
 		}

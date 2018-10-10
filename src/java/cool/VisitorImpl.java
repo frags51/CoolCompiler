@@ -2,7 +2,7 @@ package cool;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import jdk.nashorn.internal.objects.Global;
+//import jdk.nashorn.internal.objects.Global;
 
 import java.util.ArrayList;
 public class VisitorImpl implements Visitor {
@@ -20,17 +20,20 @@ public class VisitorImpl implements Visitor {
 		    GlobalData.classCopy.put(curr.name, new AST.class_(curr));
         }
 
-        graph.mangleNames();
+
+
 
         /* DFS starting off from Object */
 		AST.class_ root = graph.getRoot();
 
 		/* DFS over child classes */
         classDFS(root);
+
     }
 
     /*Preorder DFS for updating parent first*/
     public void classDFS(AST.class_ currClass){
+        graph.mangleNames(currClass.name);
         currClass.accept(this);
 
         for( String child : currClass.children){
@@ -42,6 +45,7 @@ public class VisitorImpl implements Visitor {
                     AST.method mthd = (AST.method) ftr;
                     if(mthd.name.equals("copy") || mthd.name.equals("out_string") || mthd.name.equals("out_int")){
                         //((AST.method)ftr).typeid = c;
+                        //if(GlobalError.DBG) System.out.println("ADDED>>"+mthd.name);
                         AST.method selfCopy = new AST.method(mthd);
                         selfCopy.typeid = child;
                         GlobalData.classCopy.get(child).features.add(selfCopy);
@@ -189,6 +193,7 @@ public class VisitorImpl implements Visitor {
                 }
             }
             else{
+                if(GlobalError.DBG) System.out.println("CHECK >> "+key+" | "+GlobalData.nameMap.get(key));
                 GlobalData.scpTable.insert(key, GlobalData.nameMap.get(key));
             }
         }

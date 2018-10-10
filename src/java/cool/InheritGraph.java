@@ -165,10 +165,10 @@ public class InheritGraph{
         List<AST.feature> y = new ArrayList<>();
         List<AST.formal> gg = new ArrayList<>();
         gg.add(new AST.formal("x", "String", 0));
-        y.add(new AST.method("out_string", gg, "Object", null,0));
+        y.add(new AST.method("out_string", gg, "IO", null,0));
         List<AST.formal> gg_int = new ArrayList<>();
         gg_int.add(new AST.formal("x", "Int", 0));
-        y.add(new AST.method("out_int", gg_int, "Object", null, 0));
+        y.add(new AST.method("out_int", gg_int, "IO", null, 0));
         y.add(new AST.method("in_int", new ArrayList<AST.formal>(), "Int", null, 0));
         y.add(new AST.method("in_string", new ArrayList<AST.formal>(), "String", null, 0));
         AST.class_ io = new AST.class_("IO", fn, "Object", y, 0);
@@ -203,9 +203,8 @@ public class InheritGraph{
     }
 
 
-    public void mangleNames(){
-        for( String className : GlobalData.classCopy.keySet()) {
-            AST.class_ currClass = map.get(className);
+    public void mangleNames(String className){
+            AST.class_ currClass = GlobalData.classCopy.get(className);
             for (AST.feature f : currClass.features) {
                 if (f instanceof AST.method) {
                     AST.method m = (AST.method) f;
@@ -218,7 +217,7 @@ public class InheritGraph{
 
                 }
             }
-        }
+        
 
 
     }

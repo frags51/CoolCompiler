@@ -297,6 +297,8 @@ public class TypeCheckVisitor implements Visitor{
         x.caller.accept(this);
 
         String callerType = x.caller.type;
+        if(GlobalError.DBG) System.out.println("ADDED>>"+callerType+" | "+GlobalData.funMangledName(x.name, callerType));
+
         String fRetType = GlobalData.getReturnType(GlobalData.funMangledName(x.name, callerType));
         if(fRetType==null){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Function "+x.name+" not declared!");
