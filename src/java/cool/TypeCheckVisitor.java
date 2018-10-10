@@ -113,7 +113,7 @@ public class TypeCheckVisitor implements Visitor{
         String t1 = x.e1.type;
         String t2 = x.e2.type;
         if(!t1.equals("Int") || !t2.equals("Int")){
-            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Invalid '=' Comparison b/w "+t1+" and "+t2+"!");
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Invalid '<' Comparison b/w "+t1+" and "+t2+"!");
             x.type="Bool";
         }
         else x.type="Bool";
@@ -266,7 +266,7 @@ public class TypeCheckVisitor implements Visitor{
     public void visit(AST.cond x) {
         x.predicate.accept(this);
         if(!x.predicate.type.equals("Bool")){
-            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Predicate of loop must be boolean!");
+            GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Predicate of 'if' must be boolean!");
         }
         x.ifbody.accept(this);
         x.elsebody.accept(this);
@@ -308,7 +308,7 @@ public class TypeCheckVisitor implements Visitor{
         x.caller.accept(this);
 
         String callerType = x.caller.type;
-        if(GlobalError.DBG) System.out.println("ADDED>>"+callerType+" | "+GlobalData.funMangledName(x.name, callerType));
+        //if(GlobalError.DBG) System.out.println("ADDED>>"+callerType+" | "+GlobalData.funMangledName(x.name, callerType));
 
         String fRetType = GlobalData.getReturnType(GlobalData.funMangledName(x.name, callerType));
         if(fRetType==null){
