@@ -375,16 +375,16 @@ public class TypeCheckVisitor implements Visitor{
         String t1 = x.branches.get(0).type;
 
         List<String> typesFound = new ArrayList<>();
-        typesFound.add(x.branches.get(0).type);
-
+        AST.branch br;
         Iterator<AST.branch> branchIterator = x.branches.iterator();
         for(; branchIterator.hasNext(); ){
-            AST.branch br = branchIterator.next();
+            br = branchIterator.next();
             if(typesFound.contains(br.type)){
                 GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Duplicate Variable Type: "+br.type+" " +
                         "found in case statement!");
             }
             br.accept(this);
+            typesFound.add(br.type);
             t1 = GlobalData.inheritGraph.lCA(t1, br.value.type);
         }
         x.type=t1;
@@ -456,7 +456,7 @@ public class TypeCheckVisitor implements Visitor{
     public void visit(AST.class_ x) {
         GlobalData.curFileName = x.filename;
         GlobalData.curClassName = x.name;
-        if(GlobalError.DBG) System.out.println("In class: "+x.name);
+        //if(GlobalError.DBG) System.out.println("In class: "+x.name);
         GlobalData.scpTable.insert(GlobalData.varMangledName("self", GlobalData.curClassName), x.name);
 
         // Evaluate each feature
