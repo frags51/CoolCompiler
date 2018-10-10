@@ -94,6 +94,7 @@ public class GlobalData{
 
     public static String getReturnType(String mangledName){
         String mapped = nameMap.get(mangledName);
+        if(mapped==null) return null;
         for(int i=0;i<mapped.length();i++){
             if(mapped.charAt(i) == '&'){
                 return mapped.substring(i+1);
