@@ -1,3 +1,4 @@
+-- Bad main
 class A {
     self(x : Int) : Bool {
         true

@@ -4,7 +4,7 @@ class A {
 };
 
 class B inherits A{
-    a(c: Int) : Int {2};
+    a(c: String) : String {2};
 };
 
 class Main inherits IO {

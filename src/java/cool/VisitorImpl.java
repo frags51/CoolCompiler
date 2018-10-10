@@ -71,7 +71,7 @@ public class VisitorImpl implements Visitor {
                 if (ftr instanceof AST.attr) {
                     /* Check rules for attribute */
                     AST.attr atr = (AST.attr) ftr;
-                    if(i==0) checkAttribute(atr,i);
+                    if(i==1) checkAttribute(atr,i);
                 } else {
                     /* Check rules for method */
                     AST.method method = (AST.method) ftr;
@@ -210,7 +210,7 @@ public class VisitorImpl implements Visitor {
 
         else{
             //REPORT TYPE MISMATCH
-            GlobalError.reportError(GlobalData.curFileName, method.lineNo, "ERROR: Multiple definitions of "+method.name+"!");
+            GlobalError.reportError(GlobalData.curFileName, method.lineNo, "ERROR: TypeID: " + method.typeid + " of "+method.name+" not found!");
         }
     }
 
