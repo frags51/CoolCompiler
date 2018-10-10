@@ -52,7 +52,25 @@ mangled names.
 ### Phase 1
 
 This involves the formation of the inheritance graph, stored in 
-`GlobalData.inheritGraph`. 
+`GlobalData.inheritGraph`. Starting from classes, penetrating into attributes and methods
+and finally dwelling into Type Checking is done by a `Visitor Pattern` fashion. First classes
+defined in `AST` are instantiated to form the nodes of the graph. 
+Some changes in the AST.java class are :
+
+* Accept method is added to all the classes to aid Visitor Design Paradigm 
+* List of children and a parent class reference is included in AST.class to link the
+ inheritence graph.
+* New constructors in AST.class and AST.method to aid in creating copies of classes for 
+modification.
+
+Base classes like `IO` and `Object` are declared and defined along with all methods and 
+attributes and added to the Inheritence
+Graph. Now after linking the graph, graph is checked using DFS and an activation stack 
+for any possible cycles in the graph. 
+```
+ A -> B -> C -> A (A->B => A inherits from B)
+```
+
 
 ### Phase 2: Type Checking
 This involves annotating the type of each node of the AST. 
@@ -162,14 +180,6 @@ in Semantic.java, so we don't need to pass a reference to an
 object of Semantic class to report errors.
 + A debug flag, `DBG` is defined that can be used to print debug 
 messages.
-
-#### InheritGraph
-+ Contains methods to form, and check for well-formed inheritance graph.
-+ Contains methods to mangle class feature names and insert them
-into the global scope table.
-+ Contains methods to check if a typename exists in the classlist.
-+ Contains methods to find Least Common Ancestor type and to check
-if a type is subtype of another.
 
 #### Semantic
 + This just has a driver method that calls the accept function 

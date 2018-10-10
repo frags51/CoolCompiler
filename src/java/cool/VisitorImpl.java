@@ -150,8 +150,8 @@ public class VisitorImpl implements Visitor {
     public void checkAttribute(AST.attr attr,int i){
         if(graph.hasClass(attr.typeid)) {
             /* Return type exists */
-
-            if (GlobalData.scpTable.lookUpLocal(GlobalData.nameMap.get(graph.getMangledKey(GlobalData.curClassName, attr.name, false))) == null) {
+            //System.out.println(attr.name+"\n"+nameMap);
+            if (GlobalData.scpTable.lookUpLocal(graph.getMangledKey(GlobalData.curClassName, attr.name, false)) == null) {
                 /* All clear */
                 String key = graph.getMangledKey(GlobalData.curClassName, attr.name, false);
                 GlobalData.scpTable.insert(key, GlobalData.nameMap.get(key));
