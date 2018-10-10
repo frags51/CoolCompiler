@@ -1,4 +1,4 @@
--- Check for Multiple Class definitions, and Existence of Main class. 
+    -- Check for Multiple Class definitions, and Existence of Main class.
 class MainB inherits IO {
   main() : Object {
       out_string("hello")

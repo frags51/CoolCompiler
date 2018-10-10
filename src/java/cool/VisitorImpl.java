@@ -71,7 +71,7 @@ public class VisitorImpl implements Visitor {
                 if (ftr instanceof AST.attr) {
                     /* Check rules for attribute */
                     AST.attr atr = (AST.attr) ftr;
-                    checkAttribute(atr,i);
+                    if(i==0) checkAttribute(atr,i);
                 } else {
                     /* Check rules for method */
                     AST.method method = (AST.method) ftr;
@@ -155,7 +155,7 @@ public class VisitorImpl implements Visitor {
                 /* All clear */
                 String key = graph.getMangledKey(GlobalData.curClassName, attr.name, false);
                 GlobalData.scpTable.insert(key, GlobalData.nameMap.get(key));
-            } else {
+            }else {
                 // already defined
                 if(i==0){
                     /* REPORT LOCAL REDEFINITION ERROR */

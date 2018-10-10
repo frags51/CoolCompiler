@@ -1,5 +1,6 @@
 class B{
     b:Int;
+    b:
 };
 
 class A{
