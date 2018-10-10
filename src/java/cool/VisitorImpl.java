@@ -174,6 +174,16 @@ public class VisitorImpl implements Visitor {
 
 
     public void checkMethod(AST.method method,int i){
+        /* Check main method */
+        if(method.name.equals("main")){
+            if(!method.formals.isEmpty()){
+                GlobalError.reportError(GlobalData.curFileName, method.lineNo, "Main formal arguments not empty!");
+            }
+        }
+
+
+
+
         if(graph.hasClass(method.typeid)) {
             String key = graph.getMangledKey(GlobalData.curClassName, method.name, true);
             if(GlobalData.scpTable.lookUpGlobal(key) != null){
