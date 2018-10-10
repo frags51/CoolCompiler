@@ -299,7 +299,7 @@ public class TypeCheckVisitor implements Visitor{
         x.caller.accept(this);
 
         String callerType = x.caller.type;
-        if(GlobalError.DBG) System.out.println("ADDED>>"+callerType+" | "+GlobalData.funMangledName(x.name, callerType));
+        //if(GlobalError.DBG) System.out.println("ADDED>>"+callerType+" | "+GlobalData.funMangledName(x.name, callerType));
 
         String fRetType = GlobalData.getReturnType(GlobalData.funMangledName(x.name, callerType));
         if(fRetType==null){
@@ -311,6 +311,8 @@ public class TypeCheckVisitor implements Visitor{
         List<String> argTypes = GlobalData.argTypesFromFun(GlobalData.funMangledName(x.name, callerType));
 
         Iterator<AST.expression> actIt = x.actuals.iterator();
+        if(GlobalError.DBG && argTypes==null) System.out.println("nnull argyt");
+
         Iterator<String> typIt = argTypes.iterator();
         AST.expression nextExpr;
         String nextTyp;

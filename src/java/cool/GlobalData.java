@@ -53,8 +53,8 @@ public class GlobalData{
      * @return List of argument types
      */
     public static List<String> argTypesFromFun(String funName){
-        if(GlobalError.DBG) System.out.println("DEBG: funName argtypes "+funName);
         String argList = nameMap.get(funName);
+
         ArrayList<String> argTypes = new ArrayList<>();
         int lengthArgList = 0,counter =0;
         for(char letter : argList.toCharArray()) {
@@ -66,7 +66,7 @@ public class GlobalData{
             else break;
         }
         if(lengthArgList == 0) {
-            return null;
+            return argTypes;
         }
 
         int argTypeLength = 0;
@@ -94,7 +94,6 @@ public class GlobalData{
 
     public static String getReturnType(String mangledName){
         String mapped = nameMap.get(mangledName);
-        if(GlobalError.DBG) System.out.println("FF: "+mangledName );
         for(int i=0;i<mapped.length();i++){
             if(mapped.charAt(i) == '&'){
                 return mapped.substring(i+1);
