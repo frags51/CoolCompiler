@@ -1,4 +1,4 @@
-#Semantic Analyzer for COOL Language
+# Semantic Analyzer for COOL Language
 
 ### Designed by: 
 Mayank Hooda
@@ -70,6 +70,26 @@ for any possible cycles in the graph.
 ```
  A -> B -> C -> A (A->B => A inherits from B)
 ```
+Now graph is check against all kind of errors like redifinition of classes or redefinition 
+of any attributes or methods and exisiting of a main function.
+
+If the graph formed is proper, then we proceed towards checking attributes and methods. A 
+HashMap `NameMap` is used which contains the translation of method and attribute names to their
+mangled names which are in turn used for storing into the ScopeTable.
+ ```
+ Important Concept : All methods and attributes of parent class are referenced into
+all child classes by their mangled names after checking for collisions. A copy of ClassList
+ is formed wherein we can alter class structures without damagind the internal AST.java structure.
+ ```
+ * Parent of object is null
+ * Class Inheritance: In case parent class is not declared, parent is set to Object by default.
+
+ Once updating all declarations into ScopeTable control flow of method expressions and their formal parameters are sent for
+type checking to resolve further inconsistencies if existing.
+
+
+
+
 
 
 ### Phase 2: Type Checking
@@ -196,7 +216,3 @@ are named `bad*.cl`. Good test cases are all the other files.
 We have tried to break/test each rule of COOL. What a test case is 
 supposed to do is commented in that file.
 
-
-+ Parent of object is null
-+ Class Inheritance: In case parent class is not declared 
-or parent is a non inheritable class, parent is set to object.
