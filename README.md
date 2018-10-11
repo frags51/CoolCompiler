@@ -5,7 +5,7 @@ Mayank Hooda
 
 Supreet Singh
 
-##Introduction
+## Introduction
 
 This program takes cool file(s) as input, and outputs a type-annotated 
 Abstract Syntax Tree, if the program conforms to COOL's semantics, and
