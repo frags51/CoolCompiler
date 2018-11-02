@@ -15,5 +15,18 @@ public class Semantic{
 */
 	public Semantic(AST.program program){
 		//Write Semantic analyzer code here
+
+		Visitor declVisitor = new VisitorImpl();
+		program.accept(declVisitor);
+		this.setErrorFlag();
+		if(GlobalError.invalidIGraph) return;
+		Visitor typeChecker = new TypeCheckVisitor();
+		program.accept(typeChecker);
+		// NEED TO SET ERROR FLAG HERE!
+		this.setErrorFlag();
+	}
+
+	private void setErrorFlag() {
+		if(GlobalError.getErrorFlag()) this.errorFlag=true;
 	}
 }
