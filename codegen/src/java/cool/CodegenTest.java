@@ -95,7 +95,7 @@ public class CodegenTest {
 		String outputFilename = baseFilename.substring(0, baseFilename.lastIndexOf('.')) + ".ll";
 
 		PrintWriter writer = new PrintWriter(outputFilename);
-
+		if(GlobalError.DBG) writer = new PrintWriter(System.out);
 		Codegen codeGenerator = new Codegen(prog.value, writer);
 		writer.close();
 	}

@@ -9,6 +9,12 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+
+		}
+
 	}
 	public static String sp = "  ";
 
@@ -39,6 +45,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		String type;
 		public expression(){
 			type = "_no_type";
@@ -52,6 +62,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public no_expr(int l){
 			lineNo = l;
 		}
@@ -63,6 +77,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public boolean value;
 		public bool_const(boolean v, int l){
@@ -77,6 +95,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public String value;
 		public string_const(String v, int l){
@@ -93,6 +115,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public int value;
 		public int_const(int v, int l){
 			value = v;
@@ -108,6 +134,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public String name;
 		public object(String v, int l){
 			name = v;
@@ -122,6 +152,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public expression e1;
 		public comp(expression v, int l){
 			e1 = v;
@@ -135,6 +169,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public expression e1;
 		public expression e2;
@@ -154,6 +192,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public expression e1;
 		public expression e2;
 		public leq(expression v1, expression v2, int l){
@@ -171,6 +213,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public expression e1;
 		public expression e2;
 		public lt(expression v1, expression v2, int l){
@@ -187,6 +233,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public expression e1;
 		public neg(expression v, int l){
 			e1 = v;
@@ -200,6 +250,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public expression e1;
 		public expression e2;
@@ -217,6 +271,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public expression e1;
 		public expression e2;
 		public mul(expression v1, expression v2, int l){
@@ -232,6 +290,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public expression e1;
 		public expression e2;
@@ -249,6 +311,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public expression e1;
 		public expression e2;
 		public plus(expression v1, expression v2, int l){
@@ -265,6 +331,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public expression e1;
 		public isvoid(expression v, int l){
 			e1 = v;
@@ -279,6 +349,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public String typeid;
 		public new_(String t, int l){
 			typeid = t;
@@ -292,6 +366,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public String name;
 		public expression e1;
@@ -308,6 +386,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public List<expression> l1;
 		public block(List<expression> v1, int l){
@@ -328,6 +410,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public expression predicate;
 		public expression body;
 		public loop(expression v1, expression v2, int l){
@@ -343,6 +429,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public expression predicate;
 		public expression ifbody;
@@ -361,6 +451,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public String name;
 		public String typeid;
@@ -381,6 +475,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public expression caller;
 		public String name;
@@ -405,6 +503,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
                 public expression caller;
 		public String typeid;
@@ -432,6 +534,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public expression predicate;
 		public List<branch> branches;
 		public typcase(expression p, List<branch> b, int l){
@@ -453,6 +559,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public String name;
 		public String type;
 		public expression value;
@@ -471,6 +581,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public String name;
 		public String typeid;
 		public formal(String n, String t, int l){
@@ -487,6 +601,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public feature(){
 		}
 		String getString(String space){
@@ -498,6 +616,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public String name;
 		public List<formal> formals;
@@ -533,6 +655,10 @@ public class AST{
 		public void accept(Visitor x) {
 			x.visit(this);
 		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
+		}
 		public String name;
 		public String typeid;
 		public expression value;
@@ -550,6 +676,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public String name;
 		public String filename;
@@ -596,6 +726,10 @@ public class AST{
 		@Override
 		public void accept(Visitor x) {
 			x.visit(this);
+		}
+		@Override
+		public void accept(VisitorRet x, StringBuilder res) {
+			x.visit(this,res);
 		}
 		public List<class_> classes;
 		public program(List<class_> c, int l){

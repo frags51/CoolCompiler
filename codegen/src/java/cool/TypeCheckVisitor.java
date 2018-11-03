@@ -123,7 +123,7 @@ public class TypeCheckVisitor implements Visitor{
     }
 
     /**
-     * not a
+     * ~ a
      * @param x
      */
     @Override
