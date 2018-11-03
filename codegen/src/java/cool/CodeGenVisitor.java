@@ -172,6 +172,14 @@ public class CodeGenVisitor implements Visitor {
 
     // Emit IR for global Strings
     private void emitGlobalStrings(){
+        /**
+         * Add %d, %s to the map.
+         */
+        GlobalData.stringConstNames.put("%d", "@_str_" + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("%s", "@_str_" + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
+        
         GlobalData.out.println("; Global String Consts");
         Set<Map.Entry<String, String>> eS = GlobalData.stringConstNames.entrySet();
 
