@@ -1,5 +1,6 @@
 package cool;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
@@ -227,7 +228,9 @@ public class CodeGenVisitor implements Visitor {
 
     private void updateStructDFS(String curr){
         AST.class_ currClass = GlobalData.inheritGraph.map.get(curr);
+
         int init = 8,index = 1;
+
 
         if(curr.equals("Int") || curr.equals("String") || curr.equals("Bool")) return ;
         init+= GlobalData.classtoSize.get(currClass.parent);
@@ -277,4 +280,7 @@ public class CodeGenVisitor implements Visitor {
         return "%class."+type + "*";
     }
 
+    static void emitConstructors(List<AST.class_> classList){
+
+    }
 }
