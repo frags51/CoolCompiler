@@ -57,7 +57,14 @@ class IRBuilder {
         return " = zext "+t1+" "+vName+" to "+t2;
     }
 
+    static String genMalloc(long size){
+        return " = call noalias i8* @malloc(i64 "+size+")\n";
+    }
 
+    // vname contains % here
+    static String genTypCastPtr(String t1, String t2, String vName){
+        return " = bitcast %class."+t1+" " + vName+" to %class."+t2+"\n";
+    }
     static String getIR(AST.bool_const x) {
         return x.value ? "1" : "0";
     }

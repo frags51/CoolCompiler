@@ -113,7 +113,6 @@ public class GlobalData{
 
     }
 
-
     public static String getReturnType(String mangledName){
         String mapped = nameMap.get(mangledName);
         if(mapped==null) return null;
@@ -125,5 +124,9 @@ public class GlobalData{
         // will never be executed hopefi;ly
 
         return null;
+    }
+
+    static boolean isPrimitive(String type){
+        return type.equals("Int") || type.equals("String") || type.equals("Bool");
     }
 }

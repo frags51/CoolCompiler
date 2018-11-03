@@ -491,6 +491,8 @@ public class TypeCheckVisitor implements Visitor{
 
     @Override
     public void visit(AST.class_ x) {
+        GlobalData.stringConstNames.put(x.name, IRBuilder.strGlobal+GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
         GlobalData.curFileName = x.filename;
         GlobalData.curClassName = x.name;
         //if(GlobalError.DBG) System.out.println("In class: "+x.name);
