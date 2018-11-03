@@ -8,7 +8,7 @@ class IRBuilder {
     static int varNumb = 0;
     static int ifNumb = 0;
 
-    private static StringBuilder temp = new StringBuilder();
+    static StringBuilder temp = new StringBuilder();
 
     static String gepString(String g){
         StringBuilder temp = new StringBuilder();
@@ -53,6 +53,9 @@ class IRBuilder {
         return temp.toString();
     }
 
+    static String genZext(String t1, String t2, String vName){
+        return " = zext "+t1+" "+vName+" to "+t2;
+    }
 
     static String getIR(AST.no_expr x) {
         return "";

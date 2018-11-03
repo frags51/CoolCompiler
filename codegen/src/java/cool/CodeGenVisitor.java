@@ -55,9 +55,33 @@ public class CodeGenVisitor implements VisitorRet {
 
     }
 
+    /**
+     * res is now:
+     * %1 = icmp slt i32 %L, %R
+     * %2 = zext i1 %1 to i8
+     * @param x
+     * @param res
+     */
     @Override
     public void visit(AST.lt x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        StringBuilder R = new StringBuilder();
+        x.e1.accept(this, L);
+        x.e2.accept(this, R);
 
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("%").append(IRBuilder.varNumb).append(" = icmp slt i32 ");
+        IRBuilder.temp.append(L).append(", ").append(R).append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
+        IRBuilder.temp.append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+        
+        res.append("%").append(IRBuilder.varNumb-1);
     }
 
     @Override
