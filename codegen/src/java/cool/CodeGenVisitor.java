@@ -168,10 +168,21 @@ public class CodeGenVisitor implements Visitor {
     @Override
     public void visit(AST.program x) {
         emitGlobalStrings();
+        emitCFuncs();
         updateStructSize();
+
     }
 
+    // Emit IR for global Strings
     private void emitGlobalStrings(){
+        /**
+         * Add %d, %s to the map.
+         */
+        GlobalData.stringConstNames.put("%d", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("%s", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
+
         GlobalData.out.println("; Global String Consts");
         Set<Map.Entry<String, String>> eS = GlobalData.stringConstNames.entrySet();
 
@@ -183,6 +194,23 @@ public class CodeGenVisitor implements Visitor {
             temp.append(x.getKey()).append("\\00\"");
             GlobalData.out.println(temp.toString());
         }
+    }
+
+
+    /**
+     * Emit Decls for C funcs:
+     * printf(), scanf(), exit() -> abort, malloc -> new
+     */
+    private void emitCFuncs(){
+        GlobalData.out.println("\n; C Function Declarations << Used to implement COOL Funcs");
+        GlobalData.out.println("declare i32 @printf(i8*, ...)\n");
+        GlobalData.out.println("declare i32 @__isoc99_scanf(i8*, ...)\n");
+        GlobalData.out.println("declare noalias i8* @malloc(i64)\n");
+        GlobalData.out.println("declare i8* @strcpy(i8*, i8*)\n");
+        GlobalData.out.println("declare i8* @strcat(i8*, i8*)\n");
+        GlobalData.out.println("declare i64 @strlen(i8*)\n");
+        GlobalData.out.println("declare void @exit(i32)\n");
+
     }
 
     private void updateStructSize(){
