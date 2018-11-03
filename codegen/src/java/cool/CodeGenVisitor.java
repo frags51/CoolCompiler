@@ -191,7 +191,7 @@ public class CodeGenVisitor implements VisitorRet {
         StringBuilder L = new StringBuilder();
         x.e1.accept(this,L);
 
-        IRBuilder.createBinary(L.toString(),null,"icmp eq",getType(x.e1.type));
+        IRBuilder.createBinary(L.toString(  ),null,"icmp eq",getType(x.e1.type));
         res.append("%").append(IRBuilder.varNumb-1);
     }
 
