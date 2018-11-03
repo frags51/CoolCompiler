@@ -1,5 +1,7 @@
 package cool;
 
+
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -30,6 +32,16 @@ public class GlobalData{
      * Set in constructor of inheritgraph (Supposed to be singleton class).
      */
     public static InheritGraph inheritGraph;
+
+    /**
+     * The number used to identify a String.
+     */
+    static int stringNameReg = 0;
+
+    /**
+     * Maps a string const to its name used in IR. Updated in TypeCheckVisitor.
+     */
+    static HashMap<String, String> stringConstNames = new HashMap<>();
 
     public static final String NOTYPE = "No_type";
 
