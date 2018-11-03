@@ -1,5 +1,6 @@
 package cool;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
@@ -275,4 +276,7 @@ public class CodeGenVisitor implements Visitor {
         return "%class."+type + "*";
     }
 
+    static void emitConstructors(List<AST.class_> classList){
+
+    }
 }
