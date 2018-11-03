@@ -172,6 +172,7 @@ public class CodeGenVisitor implements Visitor {
         emitCFuncs();
         updateStructSize();
 
+        emitConstructors(null);
     }
 
     // Emit IR for global Strings
@@ -281,6 +282,7 @@ public class CodeGenVisitor implements Visitor {
     }
 
     static void emitConstructors(List<AST.class_> classList){
-
+        GlobalData.out.println(IRBuilder.constructorObject());
+        GlobalData.out.println(IRBuilder.constructorIO());
     }
 }
