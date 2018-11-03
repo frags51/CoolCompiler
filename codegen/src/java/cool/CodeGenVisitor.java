@@ -5,175 +5,266 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
 
-public class CodeGenVisitor implements Visitor {
+public class CodeGenVisitor implements VisitorRet {
+
     @Override
-    public void visit(AST.ASTNode x) {
+    public void visit(AST.ASTNode x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.expression x) {
+    public void visit(AST.expression x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.no_expr x) {
+    public void visit(AST.no_expr x, StringBuilder res) {
+        res.setLength(0);
+    }
+
+    @Override
+    public void visit(AST.string_const x, StringBuilder res){
+        IRBuilder.varNumb++;
+        GlobalData.out.println(new StringBuilder("%").append(IRBuilder.varNumb-1).append(" = ").append(IRBuilder.gepString(x.value)).append("\n").toString());
+        res.setLength(0);
+        res.append("%").append(IRBuilder.varNumb-1);
+    }
+
+    @Override
+    public void visit(AST.int_const x, StringBuilder res) {
+        res.append(Integer.toString(x.value));
+    }
+
+    @Override
+    public void visit(AST.object x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.string_const x) {
+    public void visit(AST.comp x, StringBuilder res) {
+        StringBuilder X = new StringBuilder();
+        x.e1.accept(this, X);
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = xor i8 1, ").append(X).append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        res.setLength(0);
+        res.append("%").append(IRBuilder.varNumb-1);
+    }
+
+    /**
+     * res is now:
+     * %1 = icmp eq i32 %L, %R
+     * %2 = zext i1 %1 to i8
+     * res contains "%2"
+     */
+    @Override
+    public void visit(AST.eq x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        StringBuilder R = new StringBuilder();
+        x.e1.accept(this, L);
+        x.e2.accept(this, R);
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = icmp eq i32 ");
+        IRBuilder.temp.append(L).append(", ").append(R).append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
+        IRBuilder.temp.append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        res.append("%").append(IRBuilder.varNumb-1);
+    }
+
+    /**
+     * res is now:
+     * %1 = icmp sle i32 %L, %R
+     * %2 = zext i1 %1 to i8
+     * res contains "%2"
+     */
+    @Override
+    public void visit(AST.leq x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        StringBuilder R = new StringBuilder();
+        x.e1.accept(this, L);
+        x.e2.accept(this, R);
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = icmp sle i32 ");
+        IRBuilder.temp.append(L).append(", ").append(R).append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
+        IRBuilder.temp.append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        res.append("%").append(IRBuilder.varNumb-1);
+    }
+
+    /**
+     * res is now:
+     * %1 = icmp slt i32 %L, %R
+     * %2 = zext i1 %1 to i8
+     * res contains "%2"
+     */
+    @Override
+    public void visit(AST.lt x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        StringBuilder R = new StringBuilder();
+        x.e1.accept(this, L);
+        x.e2.accept(this, R);
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = icmp slt i32 ");
+        IRBuilder.temp.append(L).append(", ").append(R).append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
+        IRBuilder.temp.append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        res.append("%").append(IRBuilder.varNumb-1);
+    }
+
+    // ~x == 0-x
+    @Override
+    public void visit(AST.neg x, StringBuilder res) {
+        StringBuilder X = new StringBuilder();
+        x.e1.accept(this, X);
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = sub i32 0, ").append(X).append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        res.setLength(0);
+        res.append("%").append(IRBuilder.varNumb-1);
+    }
+
+    @Override
+    public void visit(AST.divide x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.int_const x) {
+    public void visit(AST.mul x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.object x) {
+    public void visit(AST.sub x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.comp x) {
+    public void visit(AST.plus x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.eq x) {
+    public void visit(AST.isvoid x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.leq x) {
+    public void visit(AST.new_ x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.lt x) {
+    public void visit(AST.assign x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.neg x) {
+    public void visit(AST.block x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.divide x) {
+    public void visit(AST.loop x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.mul x) {
+    public void visit(AST.cond x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.sub x) {
+    public void visit(AST.let x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.plus x) {
+    public void visit(AST.dispatch x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.isvoid x) {
+    public void visit(AST.static_dispatch x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.new_ x) {
+    public void visit(AST.typcase x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.assign x) {
+    public void visit(AST.branch x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.block x) {
+    public void visit(AST.formal x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.loop x) {
+    public void visit(AST.bool_const x, StringBuilder res) {
+        res.append(x.value?"1":"0");
+    }
+
+    @Override
+    public void visit(AST.feature x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.cond x) {
+    public void visit(AST.method x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.let x) {
+    public void visit(AST.attr x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.dispatch x) {
+    public void visit(AST.class_ x, StringBuilder res) {
 
     }
 
     @Override
-    public void visit(AST.static_dispatch x) {
-
-    }
-
-    @Override
-    public void visit(AST.typcase x) {
-
-    }
-
-    @Override
-    public void visit(AST.branch x) {
-
-    }
-
-    @Override
-    public void visit(AST.formal x) {
-
-    }
-
-    @Override
-    public void visit(AST.bool_const x) {
-
-    }
-
-    @Override
-    public void visit(AST.feature x) {
-
-    }
-
-    @Override
-    public void visit(AST.method x) {
-
-    }
-
-    @Override
-    public void visit(AST.attr x) {
-
-    }
-
-    @Override
-    public void visit(AST.class_ x) {
-
-    }
-
-    @Override
-    public void visit(AST.program x) {
+    public void visit(AST.program x, StringBuilder res) {
         emitGlobalStrings();
         emitCFuncs();
         updateStructSize();
 
         emitConstructors(null);
     }
+
 
     // Emit IR for global Strings
     private void emitGlobalStrings(){

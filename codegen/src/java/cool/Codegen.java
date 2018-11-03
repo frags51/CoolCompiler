@@ -8,6 +8,6 @@ public class Codegen{
 		GlobalData.out = out;
         out.println("; LLVM-IR generated as a part of Compilers-2 IITH.");
         CodeGenVisitor vis = new CodeGenVisitor();
-        program.accept(vis);
+        program.accept(vis, null);
 	}
 }
