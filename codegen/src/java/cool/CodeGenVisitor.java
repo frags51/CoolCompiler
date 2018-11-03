@@ -2,6 +2,7 @@ package cool;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
 
 public class CodeGenVisitor implements Visitor {
     @Override
@@ -185,14 +186,65 @@ public class CodeGenVisitor implements Visitor {
     }
 
     private void updateStructSize(){
+        GlobalData.classtoSize = new HashMap<>();
         AST.class_ root = GlobalData.inheritGraph.getRoot();
+        updateDefaultSize();
+        GlobalData.out.println();
+        GlobalData.out.println("; Class Declarations\n");
+        GlobalData.out.println("%class."+root.name+ " = type {i8*}");
         for(String child : root.children)
-            updateStructDFS(GlobalData.inheritGraph.map.get(child));
+            updateStructDFS(child);
     }
 
-    private void updateStructDFS(AST.class_ curr){
+    private void updateStructDFS(String curr){
+        AST.class_ currClass = GlobalData.inheritGraph.map.get(curr);
+        int init = 8;
+
+        if(curr.equals("Int") || curr.equals("String") || curr.equals("Bool")) return ;
+        init+= GlobalData.classtoSize.get(currClass.parent);
+        StringBuilder builder = new StringBuilder("%class."+curr);
+        builder.append((" = type { ")).append("%class."+ currClass.parent);
+        for(AST.feature f : currClass.features){
+            if(f instanceof AST.attr){
+                AST.attr a = (AST.attr) f;
+                init+= getSizeForStruct(a.typeid);
+                builder.append(", ").append(getType(a.typeid));
+            }
+        }
+        builder.append('}');
+        GlobalData.out.println(builder.toString());
+        GlobalData.classtoSize.put(curr,init);
+        for(String child : currClass.children) updateStructDFS(child);
+
 
     }
 
+    private void updateDefaultSize() {
+        // These are defined manually
+        GlobalData.classtoSize.put("Int", 4);
+        GlobalData.classtoSize.put("Bool", 1);
+        GlobalData.classtoSize.put("String", 8);
+        GlobalData.classtoSize.put("Object", 0);
+        GlobalData.classtoSize.put("IO", 0);
+    }
+
+    private int getSizeForStruct(String type) {
+        if(type.equals("Int")) return 4;
+        else if(type.equals("Bool")) return 1;
+        else return 8;
+    }
+
+    public static String getType(String type) {
+        if(type.equals("String")) {
+            return "i8*";
+        }
+        else if(type.equals("Int")) {
+            return "i32";
+        }
+        else if(type.equals("Bool")) {
+            return "i1";
+        }
+        return "%class."+type + "*";
+    }
 
 }

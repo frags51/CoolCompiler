@@ -47,9 +47,9 @@ public class GlobalData{
     // For printing from other files.
     static PrintWriter out;
 
-    static InheritGraph graph;
     public static final String NOTYPE = "No_type";
 
+    public static HashMap<String, Integer> classtoSize;
     /**
      * Return the name of the variable mangled by the class name.
      * @return
