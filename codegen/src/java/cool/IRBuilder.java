@@ -10,14 +10,15 @@ class IRBuilder {
 
     static StringBuilder temp = new StringBuilder();
 
-    static String gepString(String g){
+    static String gepString(String g) {
         StringBuilder temp = new StringBuilder();
-        temp.append("getelementptr inbounds [").append(g.length()+1).append(" x i8]");
-        temp.append(", [").append(g.length()+1).append(" x i8]* ").append(GlobalData.stringConstNames.get(g));
+        temp.append("getelementptr inbounds [").append(g.length() + 1).append(" x i8]");
+        temp.append(", [").append(g.length() + 1).append(" x i8]* ").append(GlobalData.stringConstNames.get(g));
         temp.append(", i32 0, i32 0");
         return temp.toString();
     }
-    static String constructorClass(AST.class_ cls){
+
+    static String constructorClass(AST.class_ cls) {
         StringBuilder tmp = new StringBuilder();
 
         return tmp.toString();
@@ -25,9 +26,10 @@ class IRBuilder {
 
     /**
      * Constructor for object. Does nothing.
+     *
      * @return IR for Object Constructor.
      */
-    static String constructorObject(){
+    static String constructorObject() {
         temp.setLength(0);
         temp.append("\n; #### CONSTR for Object\n");
         temp.append("define void @").append(GlobalData.funMangledName("Object", "Object"));
@@ -39,9 +41,10 @@ class IRBuilder {
 
     /**
      * Constructor for object. Does nothing.
+     *
      * @return IR for Object Constructor.
      */
-    static String constructorIO(){
+    static String constructorIO() {
         temp.setLength(0);
         temp.append("\n; #### CONSTR for IO\n");
         temp.append("define void @").append(GlobalData.funMangledName("IO", "IO"));
@@ -53,22 +56,20 @@ class IRBuilder {
         return temp.toString();
     }
 
-    static String genZext(String t1, String t2, String vName){
-        return " = zext "+t1+" "+vName+" to "+t2;
+    static String genZext(String t1, String t2, String vName) {
+        return " = zext " + t1 + " " + vName + " to " + t2;
     }
 
 
     static String getIR(AST.bool_const x) {
         return x.value ? "1" : "0";
     }
-}
 
-    private String getArithmeticOp(String exp1, String exp2, String op, String type){
-        
-
-
-
-
-
-
+    static void createBinary(String L, String R, String op,String type) {
+        temp.setLength(0);
+        temp.append("\t%").append(varNumb).append(" = ").append(op).append(" ").append(type);
+        temp.append(L).append(", ").append(R).append("\n");
+        varNumb++;
+        GlobalData.out.println(temp.toString());
     }
+}

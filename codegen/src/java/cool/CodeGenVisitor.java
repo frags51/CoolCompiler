@@ -89,16 +89,12 @@ public class CodeGenVisitor implements VisitorRet {
      */
     @Override
     public void visit(AST.leq x, StringBuilder res) {
+
         StringBuilder L = new StringBuilder();
         StringBuilder R = new StringBuilder();
-        x.e1.accept(this, L);
-        x.e2.accept(this, R);
-
-        IRBuilder.temp.setLength(0);
-        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = icmp sle i32 ");
-        IRBuilder.temp.append(L).append(", ").append(R).append("\n");
-        IRBuilder.varNumb++;
-        GlobalData.out.println(IRBuilder.temp.toString());
+        x.e1.accept(this,L);
+        x.e2.accept(this,R);
+        IRBuilder.createBinary(L.toString(),R.toString(),"icmp sle","i32");
 
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
@@ -121,12 +117,7 @@ public class CodeGenVisitor implements VisitorRet {
         StringBuilder R = new StringBuilder();
         x.e1.accept(this, L);
         x.e2.accept(this, R);
-
-        IRBuilder.temp.setLength(0);
-        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = icmp slt i32 ");
-        IRBuilder.temp.append(L).append(", ").append(R).append("\n");
-        IRBuilder.varNumb++;
-        GlobalData.out.println(IRBuilder.temp.toString());
+        IRBuilder.createBinary(L.toString(),R.toString(),"icmp slt","i32");
 
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
@@ -153,27 +144,55 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.divide x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        StringBuilder R = new StringBuilder();
+        x.e1.accept(this,L);
+        x.e2.accept(this,R);
+        IRBuilder.createBinary(L.toString(),R.toString(),"div","i32");
+        res.append("%").append(IRBuilder.varNumb-1);
 
     }
 
     @Override
     public void visit(AST.mul x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        StringBuilder R = new StringBuilder();
+        x.e1.accept(this,L);
+        x.e2.accept(this,R);
+        IRBuilder.createBinary(L.toString(),R.toString(),"mul","i32");
+        res.append("%").append(IRBuilder.varNumb-1);
 
     }
 
     @Override
     public void visit(AST.sub x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        StringBuilder R = new StringBuilder();
+        x.e1.accept(this,L);
+        x.e2.accept(this,R);
+        IRBuilder.createBinary(L.toString(),R.toString(),"sub","i32");
+        res.append("%").append(IRBuilder.varNumb-1);
 
     }
 
     @Override
     public void visit(AST.plus x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        StringBuilder R = new StringBuilder();
+        x.e1.accept(this,L);
+        x.e2.accept(this,R);
+        IRBuilder.createBinary(L.toString(),R.toString(),"add","i32");
+        res.append("%").append(IRBuilder.varNumb-1);
 
     }
 
     @Override
     public void visit(AST.isvoid x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        x.e1.accept(this,L);
 
+        IRBuilder.createBinary(L.toString(),null,"icmp eq",getType(x.e1.type));
+        res.append("%").append(IRBuilder.varNumb-1);
     }
 
     @Override
