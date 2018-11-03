@@ -19,7 +19,7 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.no_expr x, StringBuilder res) {
-
+        res.setLength(0);
     }
 
     @Override
@@ -27,12 +27,12 @@ public class CodeGenVisitor implements VisitorRet {
         IRBuilder.varNumb++;
         GlobalData.out.println(new StringBuilder("%").append(IRBuilder.varNumb-1).append(" = ").append(IRBuilder.gepString(x.value)).append("\n").toString());
         res.setLength(0);
-        res.append(IRBuilder.varNumb-1);
+        res.append("%").append(IRBuilder.varNumb-1);
     }
 
     @Override
     public void visit(AST.int_const x, StringBuilder res) {
-
+        res.append(Integer.toString(x.value));
     }
 
     @Override
@@ -42,25 +42,78 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.comp x, StringBuilder res) {
+        StringBuilder X = new StringBuilder();
+        x.e1.accept(this, X);
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = xor i8 1, ").append(X).append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
 
+        res.setLength(0);
+        res.append("%").append(IRBuilder.varNumb-1);
     }
 
+    /**
+     * res is now:
+     * %1 = icmp eq i32 %L, %R
+     * %2 = zext i1 %1 to i8
+     * res contains "%2"
+     */
     @Override
     public void visit(AST.eq x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        StringBuilder R = new StringBuilder();
+        x.e1.accept(this, L);
+        x.e2.accept(this, R);
 
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = icmp eq i32 ");
+        IRBuilder.temp.append(L).append(", ").append(R).append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
+        IRBuilder.temp.append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        res.append("%").append(IRBuilder.varNumb-1);
     }
 
+    /**
+     * res is now:
+     * %1 = icmp sle i32 %L, %R
+     * %2 = zext i1 %1 to i8
+     * res contains "%2"
+     */
     @Override
     public void visit(AST.leq x, StringBuilder res) {
+        StringBuilder L = new StringBuilder();
+        StringBuilder R = new StringBuilder();
+        x.e1.accept(this, L);
+        x.e2.accept(this, R);
 
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = icmp sle i32 ");
+        IRBuilder.temp.append(L).append(", ").append(R).append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
+        IRBuilder.temp.append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        res.append("%").append(IRBuilder.varNumb-1);
     }
 
     /**
      * res is now:
      * %1 = icmp slt i32 %L, %R
      * %2 = zext i1 %1 to i8
-     * @param x
-     * @param res
+     * res contains "%2"
      */
     @Override
     public void visit(AST.lt x, StringBuilder res) {
@@ -70,23 +123,32 @@ public class CodeGenVisitor implements VisitorRet {
         x.e2.accept(this, R);
 
         IRBuilder.temp.setLength(0);
-        IRBuilder.temp.append("%").append(IRBuilder.varNumb).append(" = icmp slt i32 ");
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = icmp slt i32 ");
         IRBuilder.temp.append(L).append(", ").append(R).append("\n");
         IRBuilder.varNumb++;
         GlobalData.out.println(IRBuilder.temp.toString());
 
         IRBuilder.temp.setLength(0);
-        IRBuilder.temp.append("%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
         IRBuilder.temp.append("\n");
         IRBuilder.varNumb++;
         GlobalData.out.println(IRBuilder.temp.toString());
-        
+
         res.append("%").append(IRBuilder.varNumb-1);
     }
 
+    // ~x == 0-x
     @Override
     public void visit(AST.neg x, StringBuilder res) {
+        StringBuilder X = new StringBuilder();
+        x.e1.accept(this, X);
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = sub i32 0, ").append(X).append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
 
+        res.setLength(0);
+        res.append("%").append(IRBuilder.varNumb-1);
     }
 
     @Override
@@ -171,7 +233,7 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.bool_const x, StringBuilder res) {
-
+        res.append(x.value?"1":"0");
     }
 
     @Override
