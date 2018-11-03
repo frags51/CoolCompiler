@@ -167,6 +167,7 @@ public class CodeGenVisitor implements Visitor {
     @Override
     public void visit(AST.program x) {
         emitGlobalStrings();
+        updateStructSize();
     }
 
     private void emitGlobalStrings(){
@@ -182,4 +183,16 @@ public class CodeGenVisitor implements Visitor {
             GlobalData.out.println(temp.toString());
         }
     }
+
+    private void updateStructSize(){
+        AST.class_ root = GlobalData.inheritGraph.getRoot();
+        for(String child : root.children)
+            updateStructDFS(GlobalData.inheritGraph.map.get(child));
+    }
+
+    private void updateStructDFS(AST.class_ curr){
+
+    }
+
+
 }
