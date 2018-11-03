@@ -195,19 +195,75 @@ public class CodeGenVisitor implements VisitorRet {
         res.append("%").append(IRBuilder.varNumb-1);
     }
 
+    // %1 = call malloc.
+    // %2 = bitcast
+    // call constructor
+    // add typename!
+    // res = %2
     @Override
     public void visit(AST.new_ x, StringBuilder res) {
+        if(x.typeid.equals("Int")) res.append("0");
+        else if(x.typeid.equals("String")) ;
+        else if(x.typeid.equals("Bool")) res.append("0");
+        else{ // not a primitive type
+            int size = GlobalData.classtoSize.get(x.typeid);
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genMalloc(size));
+            IRBuilder.varNumb++;
+            IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(" = bitcast i8* %").append(IRBuilder.varNumb-1);
+            IRBuilder.temp.append(" to %class.").append(x.typeid).append("*\n");
+            IRBuilder.varNumb++;
 
+            res.append("%").append(IRBuilder.varNumb-1);
+
+            // Constructor
+            IRBuilder.temp.append("\tcall void @").append(GlobalData.funMangledName(x.typeid, x.typeid)).append("(%class.");
+            IRBuilder.temp.append(x.typeid).append("* ").append(res).append(")\n");
+
+            // Set TypeName
+            if(x.typeid.equals("Object")){
+                IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append("= getelementptr inbounds %class.").append(x.typeid);
+                IRBuilder.temp.append(", %class.").append(x.typeid).append("* ").append(res).append(", i32 0, i32 0\n");
+                IRBuilder.varNumb++;
+
+                IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.gepString(x.typeid)).append("\n");
+                IRBuilder.varNumb++;
+
+                IRBuilder.temp.append("\t store i8* %").append(IRBuilder.varNumb-1).append(", i8** %").append(IRBuilder.varNumb-2);
+                IRBuilder.temp.append("\n");
+            }
+            else{
+                IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genTypCastPtr(x.typeid, "Object", res.toString()));
+                IRBuilder.varNumb++;
+
+                IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append("= getelementptr inbounds %class.").append(x.typeid);
+                IRBuilder.temp.append(", %class.").append(x.typeid).append("* ").append(res).append(", i32 0, i32 0\n");
+                IRBuilder.varNumb++;
+
+                IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.gepString(x.typeid)).append("\n");
+                IRBuilder.varNumb++;
+
+                IRBuilder.temp.append("\t store i8* %").append(IRBuilder.varNumb-1).append(", i8** %").append(IRBuilder.varNumb-2);
+                IRBuilder.temp.append("\n");
+            }
+
+            GlobalData.out.println(IRBuilder.temp.toString());
+        }
     }
 
     @Override
     public void visit(AST.assign x, StringBuilder res) {
-
+        
     }
 
+    // res is the result of last expr
     @Override
     public void visit(AST.block x, StringBuilder res) {
-
+        StringBuilder R = new StringBuilder();
+        for(AST.expression e: x.l1){
+            e.accept(this, R);
+        }
+        res.append(R);
     }
 
     @Override
