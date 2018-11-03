@@ -167,8 +167,10 @@ public class CodeGenVisitor implements Visitor {
     @Override
     public void visit(AST.program x) {
         emitGlobalStrings();
+        emitCFuncs();
     }
 
+    // Emit IR for global Strings
     private void emitGlobalStrings(){
         GlobalData.out.println("; Global String Consts");
         Set<Map.Entry<String, String>> eS = GlobalData.stringConstNames.entrySet();
@@ -181,5 +183,21 @@ public class CodeGenVisitor implements Visitor {
             temp.append(x.getKey()).append("\\00\"");
             GlobalData.out.println(temp.toString());
         }
+    }
+
+    /**
+     * Emit Decls for C funcs:
+     * printf(), scanf(), exit() -> abort, malloc -> new
+     */
+    private void emitCFuncs(){
+        GlobalData.out.println("\n; C Function Declarations << Used to implement COOL Funcs");
+        GlobalData.out.println("declare i32 @printf(i8*, ...)\n");
+        GlobalData.out.println("declare i32 @__isoc99_scanf(i8*, ...)\n");
+        GlobalData.out.println("declare noalias i8* @malloc(i64)\n");
+        GlobalData.out.println("declare i8* @strcpy(i8*, i8*)\n");
+        GlobalData.out.println("declare i8* @strcat(i8*, i8*)\n");
+        GlobalData.out.println("declare i64 @strlen(i8*)\n");
+        GlobalData.out.println("declare void @exit(i32)\n");
+
     }
 }
