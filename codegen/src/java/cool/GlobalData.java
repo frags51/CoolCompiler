@@ -2,6 +2,7 @@ package cool;
 
 
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -36,12 +37,15 @@ public class GlobalData{
     /**
      * The number used to identify a String.
      */
-    static int stringNameReg = 0;
+    static int stringNameNum = 0;
 
     /**
      * Maps a string const to its name used in IR. Updated in TypeCheckVisitor.
      */
     static HashMap<String, String> stringConstNames = new HashMap<>();
+
+    // For printing from other files.
+    static PrintWriter out;
 
     public static final String NOTYPE = "No_type";
 

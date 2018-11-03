@@ -25,8 +25,8 @@ public class TypeCheckVisitor implements Visitor{
     @Override
     public void visit(AST.string_const x) {
         // Also put these strings in a GlobalMap
-        GlobalData.stringConstNames.put(x.value, "@.str." + GlobalData.stringNameReg);
-        GlobalData.stringNameReg++;
+        GlobalData.stringConstNames.put(x.value, "@_str_" + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
         x.type="String";
     }
 
