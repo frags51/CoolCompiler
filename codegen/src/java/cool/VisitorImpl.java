@@ -18,9 +18,7 @@ public class VisitorImpl implements Visitor {
 		GlobalData.classCopy = new HashMap<>();
 		for(AST.class_ curr: graph.classList){
 		    GlobalData.classCopy.put(curr.name, new AST.class_(curr));
-        }
-
-
+        }          
 
 
         /* DFS starting off from Object */
