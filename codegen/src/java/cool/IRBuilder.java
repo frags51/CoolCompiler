@@ -10,6 +10,13 @@ class IRBuilder {
 
     private static StringBuilder temp = new StringBuilder();
 
+    static String gepString(String g){
+        StringBuilder temp = new StringBuilder();
+        temp.append("getelementptr inbounds [").append(g.length()+1).append(" x i8]");
+        temp.append(", [").append(g.length()+1).append(" x i8]* ").append(GlobalData.stringConstNames.get(g));
+        temp.append(", i32 0, i32 0");
+        return temp.toString();
+    }
     static String constructorClass(AST.class_ cls){
         StringBuilder tmp = new StringBuilder();
 
@@ -48,15 +55,16 @@ class IRBuilder {
 
 
     static String getIR(AST.no_expr x) {
-        return null;
+        return "";
     }
 
+    // return %<num> -> The variable containing pointer to this string
     static String getIR(AST.string_const x) {
-        return null;
+        return "";
     }
 
     static String getIR(AST.int_const x) {
-        return null;
+        return Integer.toString(x.value);
     }
 
     static String getIR(AST.object x) {
@@ -72,6 +80,7 @@ class IRBuilder {
     }
 
     static String getIR(AST.leq x) {
+
         return null;
     }
 
@@ -144,6 +153,6 @@ class IRBuilder {
     }
 
     static String getIR(AST.bool_const x) {
-        return null;
+        return x.value ? "1" : "0";
     }
 }
