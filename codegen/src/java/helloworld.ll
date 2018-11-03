@@ -6,3 +6,5 @@
 ; Class Declarations
 
 %class.Object = type {i8*}
+%class.Main = type { %class.Object}
+%class.IO = type { %class.Object}

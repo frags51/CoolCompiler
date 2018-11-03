@@ -224,7 +224,7 @@ public class CodeGenVisitor implements Visitor {
         GlobalData.classtoSize.put("Int", 4);
         GlobalData.classtoSize.put("Bool", 1);
         GlobalData.classtoSize.put("String", 8);
-        GlobalData.classtoSize.put("Object", 0);
+        GlobalData.classtoSize.put("Object", 8);
         GlobalData.classtoSize.put("IO", 0);
     }
 
