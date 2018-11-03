@@ -270,7 +270,7 @@ public class CodeGenVisitor implements Visitor {
             return "i32";
         }
         else if(type.equals("Bool")) {
-            return "i1";
+            return "i8";
         }
         return "%class."+type + "*";
     }
