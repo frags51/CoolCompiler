@@ -147,3 +147,13 @@ class IRBuilder {
         return null;
     }
 }
+
+    private String getArithmeticOp(String exp1, String exp2, String op, String type){
+        
+
+
+
+
+
+
+    }
