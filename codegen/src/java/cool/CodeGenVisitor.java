@@ -198,7 +198,7 @@ public class CodeGenVisitor implements Visitor {
 
     private void updateStructDFS(String curr){
         AST.class_ currClass = GlobalData.inheritGraph.map.get(curr);
-        int init = 8;
+        int init = 0;
 
         if(curr.equals("Int") || curr.equals("String") || curr.equals("Bool")) return ;
         init+= GlobalData.classtoSize.get(currClass.parent);
