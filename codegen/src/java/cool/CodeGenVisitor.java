@@ -234,7 +234,7 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.assign x, StringBuilder res) {
-        
+
     }
 
     // res is the result of last expr
@@ -383,7 +383,7 @@ public class CodeGenVisitor implements VisitorRet {
         if(curr.equals("Int") || curr.equals("String") || curr.equals("Bool")) return ;
         init+= GlobalData.classtoSize.get(currClass.parent);
         StringBuilder builder = new StringBuilder("%class."+curr);
-        builder.append((" = type { ")).append("%class."+ currClass.parent);
+        builder.append((" = type { ")).append("%class.").append(currClass.parent);
         for(AST.feature f : currClass.features){
             if(f instanceof AST.attr){
                 AST.attr a = (AST.attr) f;
