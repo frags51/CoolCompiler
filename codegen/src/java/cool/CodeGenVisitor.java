@@ -183,6 +183,7 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.divide x, StringBuilder res) {
+        // TODO: check div by zero.
         StringBuilder L = new StringBuilder();
         StringBuilder R = new StringBuilder();
         x.e1.accept(this,L);
@@ -536,7 +537,11 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.method x, StringBuilder res) {
+        // Bookkeeping
+        GlobalData.formalPMap.clear();
+        GlobalData.curFunName = x.name;
 
+        for (AST.formal g : x.formals) GlobalData.formalPMap.put(g.name, g.typeid);
     }
 
     @Override
