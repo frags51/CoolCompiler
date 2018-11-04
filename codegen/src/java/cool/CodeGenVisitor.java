@@ -509,6 +509,41 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.static_dispatch x, StringBuilder res) {
+        StringBuilder callerRes = new StringBuilder();
+        x.caller.accept(this, callerRes);
+
+        if(!GlobalData.isPrimitive(x.caller.type)){ // check isvoid
+            String ifL = "if.then."+ IRBuilder.ifNumb;
+
+            String endL = "if.end."+IRBuilder.ifNumb;
+            IRBuilder.ifNumb++;
+
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = icmp eq ")
+                    .append(IRBuilder.llvmTypeName(x.caller.type)).append(" ")
+                    .append(callerRes).append(", null\n");
+            String cmpReg = "%"+(IRBuilder.varNumb-1);
+            IRBuilder.temp.append("\tbr i1 ").append(cmpReg).append(", label %").append(ifL).append(", label %").append(endL);
+
+            IRBuilder.temp.append("\n").append(ifL).append(":\n");
+            IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%s"));
+            String pS = "%"+(IRBuilder.varNumb-1);
+            IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%d\n"));
+            String pD = "%"+(IRBuilder.varNumb-1);
+            IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("ERROR: Disp on Void->Line: "));
+            String eS = "%"+(IRBuilder.varNumb-1);
+
+            IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append(eS).append(")\n");
+            IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pD).append(", i32 ").append(x.lineNo).append(")\n");
+            IRBuilder.temp.append("\tcall void @exit(int32 1)\n");
+            IRBuilder.temp.append("\tbr label %").append(endL).append("\n");
+            GlobalData.out.println(IRBuilder.temp);
+
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append(endL).append(":\n");
+
+        } // check isvoid
+
         
     }
 
@@ -659,9 +694,15 @@ public class CodeGenVisitor implements VisitorRet {
          */
         GlobalData.stringConstNames.put("%d", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("%d\n", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
         GlobalData.stringConstNames.put("%s", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("%s\n", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
         GlobalData.stringConstNames.put("", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("ERROR: Disp on Void->Line: ", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
 
         GlobalData.out.println("; Global String Consts");
