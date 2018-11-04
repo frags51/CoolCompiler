@@ -273,14 +273,49 @@ public class CodeGenVisitor implements VisitorRet {
         String whileEndLabel = "while.end"+IRBuilder.whileNumb;
         IRBuilder.whileNumb++;
 
-        StringBuilder condBuilder = new StringBuilder();
-        condBuilder.append("br label %").append(whileCondLabel);
-        GlobalData.out.println(condBuilder.toString());
+        /* Make the break */
+        StringBuilder condBreak = new StringBuilder();
+        condBreak.append("br label %").append(whileCondLabel);
+        GlobalData.out.println(condBreak.toString());
 
-        StringBuilder whPred = new StringBuilder();
-        x.predicate.accept(this,whPred);
+        /* Make label */
+        StringBuilder condLabel = new StringBuilder();
+        condLabel.append("\n").append(whileCondLabel).append(":");
+        GlobalData.out.println(condLabel.toString());
 
-        /* Buzzzzz slepttttttt after this */
+        StringBuilder pred = new StringBuilder();
+        x.predicate.accept(this,pred);
+        /* pred holds the result */
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genTrunc("i8", "i1", pred.toString()));
+        IRBuilder.temp.append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+
+        /* Condition break */
+        StringBuilder breakBuild = new StringBuilder();
+        breakBuild.append("br i1 ");
+        breakBuild.append("%").append(IRBuilder.varNumb).append(", ");
+        breakBuild.append("label %").append(whileBodyLabel);
+        breakBuild.append(", label %").append(whileEndLabel);
+        GlobalData.out.println(breakBuild.toString());
+
+        StringBuilder bodyLabel = new StringBuilder();
+        bodyLabel.append("\n").append(whileBodyLabel).append(":");
+        GlobalData.out.println(bodyLabel.toString());
+
+        StringBuilder inter = new StringBuilder();
+        x.body.accept(this,inter);
+
+        /* Another break */
+        condBreak.setLength(0);
+        condBreak.append("br label %").append(whileCondLabel);
+        GlobalData.out.println(condBreak.toString());
+
+        StringBuilder endLabel = new StringBuilder();
+        bodyLabel.append("\n").append(whileEndLabel).append(":");
+        GlobalData.out.println(endLabel.toString());
+
     }
 
     @Override
