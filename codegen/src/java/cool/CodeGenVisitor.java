@@ -37,7 +37,46 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.object x, StringBuilder res) {
+        if(x.name.equals("self")) { // self implicitly bound to this!
+            res.append("%this");
+            return;
+        }
+        if(GlobalData.isFormalP(x.name)){ // load this thing up in memory.
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb()).append(" = load ").append(IRBuilder.llvmTypeName(x.type))
+                    .append(" , ").append(IRBuilder.llvmTypeName(x.type)).append("*").append(" %").append(x.name).append(".addr")
+                    .append("\n");
+            GlobalData.out.println(IRBuilder.temp);
+            res.append("%").append(IRBuilder.varNumb-1);
+        }
+        else{
+            StringBuilder gep = new StringBuilder(" = getelementptr inbounds ").append(IRBuilder.llvmTypeNameNotPtr(GlobalData.curClassName))
+                    .append(" ").append(IRBuilder.llvmTypeName(GlobalData.curClassName)).append(" %this, ");
+            int i = 0, ind=0;
+            String tClass = GlobalData.curClassName;
+            while(true){ // loop will definitely end!
+                if(GlobalData.attrToIndex.containsKey(GlobalData.varMangledName(x.name, tClass))) {
+                    ind = GlobalData.attrToIndex.get(GlobalData.varMangledName(x.name, tClass));
+                    break;
+                }
+                else{
+                    if(GlobalError.DBG) System.out.println("; In loop! CodeGenVisitor AST.assign!");
+                    tClass = GlobalData.inheritGraph.map.get(tClass).parent;
+                    i++;
+                }
+            }
+            for(int g=0; g<i+1;g++) gep.append("i32 0, ");
+            gep.append("i32 ").append(ind).append("\n");
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(gep);
 
+            IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb()).append(" = load ").append(IRBuilder.llvmTypeName(x.type))
+                    .append(" , ").append(IRBuilder.llvmTypeName(x.type)).append("*").append(" %").append(IRBuilder.varNumb-2)
+                    .append("\n");
+            GlobalData.out.println(IRBuilder.temp);
+
+            res.append("%").append(IRBuilder.varNumb-1);
+        }
     }
 
     @Override
