@@ -592,7 +592,35 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.attr x, StringBuilder res) {
+        StringBuilder bodyRes = new StringBuilder();
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = getelementptr inbounds ")
+                .append(IRBuilder.llvmTypeNameNotPtr(GlobalData.curClassName)).append(", ")
+                .append(IRBuilder.llvmTypeName(GlobalData.curClassName)).append(" %this, i32 0, i32 ")
+                .append(GlobalData.attrToIndex.get(GlobalData.varMangledName(x.name, GlobalData.curClassName)))
+                .append("\n");
+        GlobalData.out.println(IRBuilder.temp);
+        String storeReg = "%"+(IRBuilder.varNumb-1);
 
+        x.value.accept(this, bodyRes);
+        if(x.value.type.equals(GlobalData.NOTYPE)){
+            String toStore;
+            if(x.typeid.equals("Int")||x.typeid.equals("Bool")) toStore="0";
+            else if(x.typeid.equals("String")){
+                StringBuilder tmp = new StringBuilder("\t");
+                tmp.append("%").append(IRBuilder.nextVarNumb()).append(IRBuilder.gepString(""));
+                GlobalData.out.println(tmp);
+                toStore="%"+(IRBuilder.varNumb-1);
+            }
+            else toStore="null";
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\tstore ").append(IRBuilder.llvmTypeName(x.typeid)).append(" ").append(toStore)
+                    .append(" , ").append(IRBuilder.llvmTypeName(x.typeid)).append("* ").append(storeReg).append("\n");
+            GlobalData.out.println(IRBuilder.temp);
+        }
+        else{
+            
+        }
     }
 
     @Override
@@ -618,6 +646,8 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.stringConstNames.put("%d", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
         GlobalData.stringConstNames.put("%s", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
 
         GlobalData.out.println("; Global String Consts");
@@ -725,7 +755,7 @@ public class CodeGenVisitor implements VisitorRet {
     }
 
     static void emitConstructorsDFS(AST.class_ currClass){
-
+        GlobalData.curClassName = currClass.name;
         if(currClass.name.equals("Int") || currClass.name.equals("String") || currClass.name.equals("IO") || currClass.name.equals("Object") || currClass.name.equals("Bool")) return ;
         GlobalData.out.println("; Constructor for class "+currClass.name);
         IRBuilder.varNumb = 0;
