@@ -555,7 +555,7 @@ public class CodeGenVisitor implements VisitorRet {
         emitCFuncs();
         updateStructSize();
 
-        emitConstructors(null);
+        emitConstructors();
     }
 
 
@@ -665,8 +665,58 @@ public class CodeGenVisitor implements VisitorRet {
         return "%class."+type + "*";
     }
 
-    static void emitConstructors(List<AST.class_> classList){
+    static void emitConstructors(){
         GlobalData.out.println(IRBuilder.constructorObject());
         GlobalData.out.println(IRBuilder.constructorIO());
+
+        AST.class_ root = GlobalData.inheritGraph.getRoot();
+        emitConstructorsDFS(root);
     }
+
+    static void emitConstructorsDFS(AST.class_ currClass){
+
+        if(currClass.name.equals("Int") || currClass.name.equals("String") || currClass.name.equals("IO") || currClass.name.equals("Object") || currClass.name.equals("Bool")) return ;
+        GlobalData.out.println("; Constructor for class "+currClass.name);
+        IRBuilder.varNumb = 0;
+
+        GlobalData.out.println("define void @" + GlobalData.funMangledName(currClass.name, currClass.name) + "(" + "%class."+currClass.name + "* %this) {");
+
+        GlobalData.out.println("\nentry:");
+        callParentConstructor(currClass,"%this");
+
+        for(AST.feature f : currClass.features) {
+            if(f instanceof AST.attr) {
+                AST.attr a = (AST.attr) f;
+                //a.accept(this);
+            }
+        }
+
+
+
+
+    }
+
+    static void callParentConstructor(AST.class_ childClass, String childRegister) {
+        String parentType = childClass.parent;
+        if(!parentType.equals(null)){
+            // CREATE CONVERT INSTRUCTION
+            StringBuilder builder = new StringBuilder();
+            String storeRegister = "%"+IRBuilder.varNumb;
+            IRBuilder.varNumb++;
+            builder.append(storeRegister);
+            builder.append(" = ").append("bitcast");
+            builder.append(" ").append(childClass.name+"*");
+            builder.append(" ").append(childRegister).append(" to ");
+            builder.append(parentType+"*");
+            GlobalData.out.println(builder.toString());
+
+            builder.setLength(0);
+            builder.append("call void @").append(GlobalData.funMangledName(parentType, parentType)).append("(").append("%class."+parentType).append("* ").append(storeRegister).append(")");
+            GlobalData.out.println(builder.toString());
+        }
+
+    }
+
+
+
 }
