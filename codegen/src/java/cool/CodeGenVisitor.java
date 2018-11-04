@@ -268,11 +268,77 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.loop x, StringBuilder res) {
+        String whileCondLabel = "while.cond."+IRBuilder.whileNumb;
+        String whileBodyLabel = "while.body"+IRBuilder.whileNumb;
+        String whileEndLabel = "while.end"+IRBuilder.whileNumb;
+        IRBuilder.whileNumb++;
 
+        StringBuilder condBuilder = new StringBuilder();
+        condBuilder.append("br label %").append(whileCondLabel);
+        GlobalData.out.println(thenbreakBuilder.toString());
+
+        StringBuilder whPred;
+        x.predicate.accept(this,whPred);
+
+        /* Buzzzzz slepttttttt after this */
     }
 
     @Override
     public void visit(AST.cond x, StringBuilder res) {
+        /* Reqd labels */
+        String ifLabel = "if.then."+ IRBuilder.ifNumb;
+        String elseLabel = "if.else."+IRBuilder.ifNumb;
+        String endLabel = "if.end."+IRBuilder.ifNumb;
+        IRBuilder.ifNumb++;
+
+        /* Visiting predicate for obtaining branch */
+        StringBuilder cmp = new StringBuilder();
+        x.predicate.accept(this,cmp);
+        IRBuilder.createBinary()
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
+        IRBuilder.temp.append("\n");
+        IRBuilder.varNumb++;
+        GlobalData.out.println(IRBuilder.temp.toString());
+        cmp.append("%").append(IRBuilder.varNumb-1);
+
+        /* Make the break instruction */
+        StringBuilder builder = new StringBuilder();
+        builder.append("br i1 ");
+        builder.append(cmp).append(", ");
+        builder.append("label %").append(ifLabel);
+        builder.append(", label %").append(elseLabel);
+        GlobalData.out.println(builder.toString());
+
+        //IF THEN
+        StringBuilder ifbuilder = new StringBuilder();
+        GlobalData.out.println("\n"+ifLabel+":");
+        x.ifbody.accept(this,ifbuilder);
+        // TODO : LOAD STORES
+        StringBuilder thenbreakBuilder = new StringBuilder();
+        thenbreakBuilder.append("br label %").append(endLabel);
+        GlobalData.out.println(thenbreakBuilder.toString());
+
+        //IF ELSE
+        StringBuilder elseBuilder = new StringBuilder();
+        GlobalData.out.println("\n"+elseLabel+":");
+        x.elsebody.accept(this,ifbuilder);
+        //TODO : LOAD STORES
+        StringBuilder elsebreakBuilder = new StringBuilder();
+        elsebreakBuilder.append("br label %").append(endLabel);
+        GlobalData.out.println(elsebreakBuilder.toString());
+
+        /* END LABEL */
+        StringBuilder endBuilder = new StringBuilder();
+        GlobalData.out.println("\n"+endLabel+":");
+
+        /* Build result type */
+        String resultType = GlobalData.inheritGraph.lCA(x.ifbody.type,x.elsebody.type);
+        /* Make allocas or load/store for res */
+
+
+
 
     }
 
