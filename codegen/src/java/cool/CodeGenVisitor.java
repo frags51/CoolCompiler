@@ -275,9 +275,9 @@ public class CodeGenVisitor implements VisitorRet {
 
         StringBuilder condBuilder = new StringBuilder();
         condBuilder.append("br label %").append(whileCondLabel);
-        GlobalData.out.println(thenbreakBuilder.toString());
+        GlobalData.out.println(condBuilder.toString());
 
-        StringBuilder whPred;
+        StringBuilder whPred = new StringBuilder();
         x.predicate.accept(this,whPred);
 
         /* Buzzzzz slepttttttt after this */
@@ -294,19 +294,18 @@ public class CodeGenVisitor implements VisitorRet {
         /* Visiting predicate for obtaining branch */
         StringBuilder cmp = new StringBuilder();
         x.predicate.accept(this,cmp);
-        IRBuilder.createBinary()
-
+        // cmp: register containing result of predicate: Boolean.
+        // truncate bool i8 to i1
         IRBuilder.temp.setLength(0);
-        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genZext("i1", "i8", "%"+(IRBuilder.varNumb-1)));
+        IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append(IRBuilder.genTrunc("i8", "i1", cmp.toString()));
         IRBuilder.temp.append("\n");
         IRBuilder.varNumb++;
         GlobalData.out.println(IRBuilder.temp.toString());
-        cmp.append("%").append(IRBuilder.varNumb-1);
 
         /* Make the break instruction */
         StringBuilder builder = new StringBuilder();
         builder.append("br i1 ");
-        builder.append(cmp).append(", ");
+        builder.append("%").append(IRBuilder.varNumb-1).append(", ");
         builder.append("label %").append(ifLabel);
         builder.append(", label %").append(elseLabel);
         GlobalData.out.println(builder.toString());
@@ -323,7 +322,7 @@ public class CodeGenVisitor implements VisitorRet {
         //IF ELSE
         StringBuilder elseBuilder = new StringBuilder();
         GlobalData.out.println("\n"+elseLabel+":");
-        x.elsebody.accept(this,ifbuilder);
+        x.elsebody.accept(this,elseBuilder);
         //TODO : LOAD STORES
         StringBuilder elsebreakBuilder = new StringBuilder();
         elsebreakBuilder.append("br label %").append(endLabel);
@@ -335,10 +334,34 @@ public class CodeGenVisitor implements VisitorRet {
 
         /* Build result type */
         String resultType = GlobalData.inheritGraph.lCA(x.ifbody.type,x.elsebody.type);
-        /* Make allocas or load/store for res */
 
+        // if no typecasts reqruied:
+        if(resultType.equals(x.ifbody.type) && resultType.equals(x.elsebody.type)){
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = phi ").append(resultType);
+            IRBuilder.temp.append(" [ ").append(ifbuilder.toString()).append(", ").append(ifLabel).append(" ],");
+            IRBuilder.temp.append(" [ ").append(elseBuilder.toString()).append(", ").append(elseLabel).append(" ]\n");
+            GlobalData.out.println(IRBuilder.temp.toString());
 
+            res.setLength(0);
+            res.append("%").append(IRBuilder.varNumb-1);
+        }
+        else{
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(IRBuilder.genTypCastPtr(x.ifbody.type, resultType, ifbuilder.toString()));
+            IRBuilder.temp.append("\n");
 
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(IRBuilder.genTypCastPtr(x.elsebody.type, resultType, elseBuilder.toString()));
+            IRBuilder.temp.append("\n");
+
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = phi ").append(resultType);
+            IRBuilder.temp.append(" [ ").append(IRBuilder.varNumb-2).append(", ").append(ifLabel).append(" ],");
+            IRBuilder.temp.append(" [ ").append(IRBuilder.varNumb-1).append(", ").append(elseLabel).append(" ]\n");
+            GlobalData.out.println(IRBuilder.temp.toString());
+
+            res.setLength(0);
+            res.append("%").append(IRBuilder.varNumb-1);
+        }
 
     }
 

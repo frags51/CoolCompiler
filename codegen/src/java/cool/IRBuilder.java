@@ -65,6 +65,9 @@ class IRBuilder {
     static String genZext(String t1, String t2, String vName) {
         return " = zext " + t1 + " " + vName + " to " + t2;
     }
+    static String genTrunc(String t1, String t2, String vName) {
+        return " = trunc " + t1 + " " + vName + " to " + t2;
+    }
 
     static String genMalloc(long size){
         return " = call noalias i8* @malloc(i64 "+size+")\n";
@@ -84,5 +87,12 @@ class IRBuilder {
         temp.append(L).append(", ").append(R).append("\n");
         varNumb++;
         GlobalData.out.println(temp.toString());
+    }
+
+    static String llvmTypeName(String typ){
+        if(typ.equals("Int")) return "i32";
+        if(typ.equals("Bool")) return "i8";
+        if(typ.equals("String")) return "i8*";
+        return "%class."+typ+"*";
     }
 }
