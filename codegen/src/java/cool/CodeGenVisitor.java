@@ -455,7 +455,7 @@ public class CodeGenVisitor implements VisitorRet {
         StringBuilder elseBuilder = new StringBuilder();
         GlobalData.out.println("\n"+elseLabel+":");
         x.elsebody.accept(this,elseBuilder);
-        
+
         StringBuilder elsebreakBuilder = new StringBuilder();
         elsebreakBuilder.append("br label %").append(endLabel);
         GlobalData.out.println(elsebreakBuilder.toString());
@@ -509,7 +509,7 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.static_dispatch x, StringBuilder res) {
-
+        
     }
 
     @Override
