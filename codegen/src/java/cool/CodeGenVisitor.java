@@ -618,8 +618,22 @@ public class CodeGenVisitor implements VisitorRet {
                     .append(" , ").append(IRBuilder.llvmTypeName(x.typeid)).append("* ").append(storeReg).append("\n");
             GlobalData.out.println(IRBuilder.temp);
         }
-        else{
-            
+        else if(x.value.type.equals(x.typeid)){
+            String toStore = bodyRes.toString();
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\tstore ").append(IRBuilder.llvmTypeName(x.typeid)).append(" ").append(toStore)
+                    .append(" , ").append(IRBuilder.llvmTypeName(x.typeid)).append("* ").append(storeReg).append("\n");
+            GlobalData.out.println(IRBuilder.temp);
+        }
+        else{ //TODO: (CHECK genTypCastPtr func) typecasting int/primitive to Object.
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb())
+                    .append(IRBuilder.genTypCastPtr(x.value.type, x.typeid, bodyRes.toString()));
+            String toStore = "%"+(IRBuilder.varNumb-1);
+
+            IRBuilder.temp.append("\tstore ").append(IRBuilder.llvmTypeName(x.typeid)).append(" ").append(toStore)
+                    .append(" , ").append(IRBuilder.llvmTypeName(x.typeid)).append("* ").append(storeReg).append("\n");
+            GlobalData.out.println(IRBuilder.temp);
         }
     }
 
