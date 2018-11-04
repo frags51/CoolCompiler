@@ -129,4 +129,8 @@ public class GlobalData{
     static boolean isPrimitive(String type){
         return type.equals("Int") || type.equals("String") || type.equals("Bool");
     }
+
+    static boolean isFormalP(String name){
+        return false;
+    }
 }

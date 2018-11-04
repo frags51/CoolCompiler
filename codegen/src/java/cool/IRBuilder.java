@@ -75,7 +75,7 @@ class IRBuilder {
 
     // vname contains % here
     static String genTypCastPtr(String t1, String t2, String vName){
-        return " = bitcast %class."+t1+" " + vName+" to %class."+t2+"\n";
+        return " = bitcast %class."+t1+"* " + vName+" to %class."+t2+"*\n";
     }
     static String getIR(AST.bool_const x) {
         return x.value ? "1" : "0";
@@ -94,5 +94,11 @@ class IRBuilder {
         if(typ.equals("Bool")) return "i8";
         if(typ.equals("String")) return "i8*";
         return "%class."+typ+"*";
+    }
+    static String llvmTypeNameNotPtr(String typ){
+        if(typ.equals("Int")) return "i32";
+        if(typ.equals("Bool")) return "i8";
+        if(typ.equals("String")) return "i8*";
+        return "%class."+typ;
     }
 }
