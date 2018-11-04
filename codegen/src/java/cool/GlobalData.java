@@ -55,6 +55,12 @@ public class GlobalData{
     public static HashMap<String, Integer> attrToIndex;
 
     public static HashMap<String, Integer> classtoSize;
+
+    static HashMap<String, String> formalPMap = new HashMap<>();
+    static String curFunName = "";
+
+
+
     /**
      * Return the name of the variable mangled by the class name.
      * @return
@@ -131,6 +137,6 @@ public class GlobalData{
     }
 
     static boolean isFormalP(String name){
-        return false;
+        return formalPMap.containsKey(name);
     }
 }
