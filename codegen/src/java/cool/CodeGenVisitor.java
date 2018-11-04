@@ -253,7 +253,7 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.assign x, StringBuilder res) {
-        
+
     }
 
     // res is the result of last expr
@@ -396,13 +396,13 @@ public class CodeGenVisitor implements VisitorRet {
     private void updateStructDFS(String curr){
         AST.class_ currClass = GlobalData.inheritGraph.map.get(curr);
 
-        int init = 8,index = 1;
+        int init = 0,index = 1;
 
 
         if(curr.equals("Int") || curr.equals("String") || curr.equals("Bool")) return ;
         init+= GlobalData.classtoSize.get(currClass.parent);
         StringBuilder builder = new StringBuilder("%class."+curr);
-        builder.append((" = type { ")).append("%class."+ currClass.parent);
+        builder.append((" = type { ")).append("%class.").append(currClass.parent);
         for(AST.feature f : currClass.features){
             if(f instanceof AST.attr){
                 AST.attr a = (AST.attr) f;
@@ -424,7 +424,7 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.classtoSize.put("Int", 4);
         GlobalData.classtoSize.put("Bool", 1);
         GlobalData.classtoSize.put("String", 8);
-        GlobalData.classtoSize.put("Object", 0);
+        GlobalData.classtoSize.put("Object", 8);
         GlobalData.classtoSize.put("IO", 0);
     }
 
