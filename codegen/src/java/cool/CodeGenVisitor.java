@@ -541,7 +541,40 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.formalPMap.clear();
         GlobalData.curFunName = x.name;
 
-        for (AST.formal g : x.formals) GlobalData.formalPMap.put(g.name, g.typeid);
+        StringBuilder args = new StringBuilder("(");
+        args.append(IRBuilder.llvmTypeName(GlobalData.curClassName)).append(" %this");
+        for (AST.formal g : x.formals) {
+            GlobalData.formalPMap.put(g.name, g.typeid);
+            args.append(", ").append(IRBuilder.llvmTypeName(g.typeid)).append(" %").append(x.name);
+        }
+        args.append(") {\n");
+
+        StringBuilder bodyRes = new StringBuilder();
+
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("; Method name: ").append(x.name).append(" from class: ").append(GlobalData.curClassName);
+        IRBuilder.temp.append("\n");
+        IRBuilder.temp.append("define ").append(IRBuilder.llvmTypeName(x.typeid)).append(" @")
+        .append(GlobalData.funMangledName(x.name,GlobalData.curClassName)).append(args).append("entry: \n");
+        GlobalData.out.println(IRBuilder.temp);
+
+        // Now need to alloc these formals onto the stack.
+        for (AST.formal g : x.formals){
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\t%").append(g.name).append(".addr  = alloca")
+                    .append(IRBuilder.llvmTypeName(g.typeid)).append("\n");
+            IRBuilder.temp.append("\tstore ").append(IRBuilder.llvmTypeName(g.typeid)).append(" %").append(g.name)
+                    .append(", ").append(IRBuilder.llvmTypeName(g.typeid)).append("* %").append(g.name).append(".addr")
+                    .append("\n");
+            GlobalData.out.println(IRBuilder.temp);
+        }
+
+        x.body.accept(this, bodyRes);
+
+        IRBuilder.temp.setLength(0);
+        // TODO: check need for typecast
+
     }
 
     @Override
