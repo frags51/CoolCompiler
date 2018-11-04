@@ -890,7 +890,6 @@ public class CodeGenVisitor implements VisitorRet {
     }
 
     static void emitConstructorsDFS(AST.class_ currClass){
-        System.out.println(currClass.name);
         GlobalData.curClassName = currClass.name;
         if(!(currClass.name.equals("Int") ||
                 currClass.name.equals("String") ||
