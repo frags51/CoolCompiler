@@ -537,14 +537,43 @@ public class CodeGenVisitor implements VisitorRet {
             IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pD).append(", i32 ").append(x.lineNo).append(")\n");
             IRBuilder.temp.append("\tcall void @exit(int32 1)\n");
             IRBuilder.temp.append("\tbr label %").append(endL).append("\n");
-            GlobalData.out.println(IRBuilder.temp);
 
-            IRBuilder.temp.setLength(0);
             IRBuilder.temp.append(endL).append(":\n");
-
+            GlobalData.out.println(IRBuilder.temp);
         } // check isvoid
 
-        
+        String ancestorWithFun = GlobalData.parentWithFun(x.name, x.typeid);
+        // Need to tpecast
+        if(!ancestorWithFun.equals(x.caller.type)){
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb())
+                    .append(IRBuilder.genTypCastPtr(x.caller.type, ancestorWithFun, callerRes.toString())).append("\n");
+            callerRes.setLength(0);
+            callerRes.append("%").append(IRBuilder.varNumb-1);
+            GlobalData.out.println(IRBuilder.temp);
+        }
+
+        StringBuilder fP = new StringBuilder("(").append(IRBuilder.llvmTypeName(ancestorWithFun)).append(" ");
+        fP.append(callerRes);
+        StringBuilder argRes = new StringBuilder();
+        for(AST.expression gg : x.actuals){
+            argRes.setLength(0);
+            fP.append(", ");
+            gg.accept(this, argRes);
+            fP.append(IRBuilder.llvmTypeName(gg.type));
+            fP.append(" ");
+            fP.append(argRes);
+        }
+        fP.append(")");
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb()).append(" = ")
+                .append("call ").append(IRBuilder.llvmTypeName(x.type)).append(" @");
+        IRBuilder.temp.append(GlobalData.funMangledName(x.name, ancestorWithFun))
+                .append(fP).append("\n");
+        GlobalData.out.println(IRBuilder.temp);
+        res.setLength(0);
+        res.append("%").append(IRBuilder.varNumb-1);
     }
 
     @Override
