@@ -6,7 +6,8 @@ class IRBuilder {
 
     // For variable/label naming etc
     static int varNumb = 0;
-    static int ifNumb = 0;
+    static int ifNumb = 1;
+    static int whileNumb = 1;
 
     static StringBuilder temp = new StringBuilder();
 
