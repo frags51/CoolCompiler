@@ -240,6 +240,7 @@ public class CodeGenVisitor implements VisitorRet {
     // call constructor
     // add typename!
     // res = %2
+    //TODO: Remove/add class name setter after every call to new
     @Override
     public void visit(AST.new_ x, StringBuilder res) {
         if(x.typeid.equals("Int")) res.append("0");
@@ -299,7 +300,8 @@ public class CodeGenVisitor implements VisitorRet {
         String asnToType = "";
 
         if(GlobalData.isFormalP(x.name)){ // store in %x.whatever
-            // TODO: Set asnToType here after processing functions!
+            // TODO: (Check) Set asnToType here after processing functions!
+            asnToType = GlobalData.formalPMap.get(x.name);
             if(x.e1.type.equals(asnToType)){ // no need to typecast.
                 IRBuilder.temp.setLength(0);
                 IRBuilder.temp.append("\tstore ").append(IRBuilder.llvmTypeName(x.type)).append(" ").append(R).append(", ")
@@ -444,7 +446,7 @@ public class CodeGenVisitor implements VisitorRet {
         StringBuilder ifbuilder = new StringBuilder();
         GlobalData.out.println("\n"+ifLabel+":");
         x.ifbody.accept(this,ifbuilder);
-        // TODO : LOAD STORES
+
         StringBuilder thenbreakBuilder = new StringBuilder();
         thenbreakBuilder.append("br label %").append(endLabel);
         GlobalData.out.println(thenbreakBuilder.toString());
@@ -453,7 +455,7 @@ public class CodeGenVisitor implements VisitorRet {
         StringBuilder elseBuilder = new StringBuilder();
         GlobalData.out.println("\n"+elseLabel+":");
         x.elsebody.accept(this,elseBuilder);
-        //TODO : LOAD STORES
+        
         StringBuilder elsebreakBuilder = new StringBuilder();
         elsebreakBuilder.append("br label %").append(endLabel);
         GlobalData.out.println(elsebreakBuilder.toString());
@@ -540,6 +542,7 @@ public class CodeGenVisitor implements VisitorRet {
         // Bookkeeping
         GlobalData.formalPMap.clear();
         GlobalData.curFunName = x.name;
+        IRBuilder.varNumb = 0;
 
         StringBuilder args = new StringBuilder("(");
         args.append(IRBuilder.llvmTypeName(GlobalData.curClassName)).append(" %this");
@@ -573,8 +576,18 @@ public class CodeGenVisitor implements VisitorRet {
         x.body.accept(this, bodyRes);
 
         IRBuilder.temp.setLength(0);
-        // TODO: check need for typecast
 
+        if(!x.body.type.equals(x.typeid)){
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb())
+                    .append(IRBuilder.genTypCastPtr(IRBuilder.llvmTypeName(x.body.type), IRBuilder.llvmTypeName(x.typeid), bodyRes.toString()));
+            IRBuilder.temp.append("\tret ").append(IRBuilder.llvmTypeName(x.typeid)).append(" %").append(IRBuilder.varNumb-1).append("\n");
+        }
+        else{
+            IRBuilder.temp.append("\tret ").append(IRBuilder.llvmTypeName(x.typeid)).append(" ").append(bodyRes).append("\n");
+        }
+        IRBuilder.temp.append("}\n");
+        GlobalData.out.println(IRBuilder.temp);
     }
 
     @Override
