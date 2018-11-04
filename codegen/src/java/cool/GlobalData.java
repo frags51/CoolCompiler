@@ -17,6 +17,7 @@ public class GlobalData{
 
     public static HashMap<String,String> nameMap = new HashMap<>();
 
+    public static String mainType = "Object";
 
     /**
      * FileName for error reporting.

@@ -90,6 +90,7 @@ public class VisitorImpl implements Visitor {
                 } else {
                     AST.method mthd = (AST.method) ftr;
                     if (mthd.name.equals("main") ) {
+                        GlobalData.mainType = mthd.typeid;
                         if(hasMainFunc==false) hasMainFunc = true;
                         else{
                             //THROW ERROR MULTIPLE MAIN FOUND

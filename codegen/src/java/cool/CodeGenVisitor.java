@@ -750,7 +750,6 @@ public class CodeGenVisitor implements VisitorRet {
         updateStructSize();
         emitConstructors();
 
-
     }
 
 
@@ -985,7 +984,7 @@ public class CodeGenVisitor implements VisitorRet {
         // in_int
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\n; Code for IO.in_int(): \n");
-        IRBuilder.temp.append("define %class.IO* @").append(GlobalData.funMangledName("in_int", "IO"))
+        IRBuilder.temp.append("define i32 @").append(GlobalData.funMangledName("in_int", "IO"))
                 .append("(%class.IO* %this){\nentry:\n");
 
         IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%d"));
@@ -1003,14 +1002,14 @@ public class CodeGenVisitor implements VisitorRet {
         // in_string
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\n; Code for IO.in_string(): \n");
-        IRBuilder.temp.append("define %class.IO* @").append(GlobalData.funMangledName("in_string", "IO"))
+        IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("in_string", "IO"))
                 .append("(%class.IO* %this){\nentry:\n");
 
         IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%s"));
         pS = "%"+(IRBuilder.varNumb-1);
 
         IRBuilder.temp.append("\n\t%store1 = alloca i8*\n");
-        IRBuilder.temp.append("\t%store = load i8*, i8** %0\n")
+        IRBuilder.temp.append("\t%store = load i8*, i8** %0\n");
         IRBuilder.temp.append("\n\t%cal = call i32 (i8*, ...) @__isoc99_scanf(i8* ").append(pS).append(", i8* ").append("%store").append(")\n");
 
         // cleanup, add :Object return code
@@ -1019,5 +1018,60 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.out.println(IRBuilder.temp);
     }
 
+    private static void emitStringFuncs(){
+        // length()
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for String.length(): \n");
+        IRBuilder.temp.append("define i32 @").append(GlobalData.funMangledName("length", "String"))
+                .append("(i8* %this){\nentry:\n");
 
+        IRBuilder.temp.append("\t%dmyretval = call i64 (i8*) @strlen(i8* %this)\n")
+                .append("\tret i64 %dmyretval\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+
+        // concat()
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for String.concat(): \n");
+        IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("concat", "String"))
+                .append("(i8* %this, i8* s2){\nentry:\n");
+
+        IRBuilder.temp.append("\t%l1 = call i64 @strlen(i8* %this)\n");
+        IRBuilder.temp.append("\t%l2 = call i64 @strlen(i8* %s2)\n");
+        IRBuilder.temp.append("\t%t1 = add i64 %l1, %l2\n");
+        IRBuilder.temp.append("\t%tot = add i64 %t1, 1\n");
+        IRBuilder.temp.append("\t%news = call noalias i8* @malloc(i64 %tot)\n");
+        IRBuilder.temp.append("\t%call1 = call i8* @strcpy(i8* news, i8* %this)\n");
+        IRBuilder.temp.append("\t%call2 = call i8* @strcat(i8* news, i8* %s2)\n");
+
+        IRBuilder.temp.append("\tret i8* %news\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+
+        // substr()
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for String.substr(), using strncpy: \n");
+        IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("concat", "String"))
+                .append("(i8* %this, i32 %s, i32 %e){\nentry:\n");
+
+        IRBuilder.temp.append("\t%l1 = zext i32 %e to i64\n");
+        IRBuilder.temp.append("\t%ptrfwd = getelementptr inbounds i8, i8* %this, i32 %s");
+        IRBuilder.temp.append("\t%news = call noalias i8* @malloc(i64 %e)\n");
+        IRBuilder.temp.append("\t%call1 = call i8* @strncpy(i8* news, i8* %ptrfwd, i64 %l1)\n");
+
+        IRBuilder.temp.append("\tret i8* %news\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+    }
+
+    private static void emitLLVMmain(){
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("; Driver Main\n");
+        IRBuilder.temp.append("define i32 @main() {\nentry:\n");
+        IRBuilder.temp.append("\t%m1 = call noalias i8* @malloc(i64 ").append(GlobalData.classtoSize.get("Main"))
+            .append(")\n");
+        IRBuilder.temp.append("\t%m = bitcast i8* %m1 to %class.Main*\n");
+        IRBuilder.temp.append("\tcall void @").append(GlobalData.funMangledName("Main", "Main"))
+                .append("(%class.Main* %m)\n");
+        IRBuilder.temp.append("\t%call = call ").append(IRBuilder.llvmTypeName(GlobalData.mainType))
+                .append(" @").append(GlobalData.funMangledName("main", "Main"))
+                .append("(%class.Main* %m)\n").append("ret i32 0\n}\n");
+    }
 }
