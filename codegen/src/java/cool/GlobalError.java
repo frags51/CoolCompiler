@@ -3,7 +3,7 @@
 package cool;
 
 public class GlobalError{
-	final public static boolean DBG = true;
+	final public static boolean DBG = false;
 
 	public  static boolean invalidIGraph=false;
 

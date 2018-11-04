@@ -17,6 +17,7 @@ public class GlobalData{
 
     public static HashMap<String,String> nameMap = new HashMap<>();
 
+    public static String mainType = "Object";
 
     /**
      * FileName for error reporting.
@@ -138,5 +139,17 @@ public class GlobalData{
 
     static boolean isFormalP(String name){
         return formalPMap.containsKey(name);
+    }
+
+    private static boolean classHasFun(String funName, String className){
+        AST.class_ e = inheritGraph.map.get(className);
+        for(AST.feature g : e.features){
+            if(g instanceof AST.method && ((AST.method) g).name.equals(funName)) return  true;
+        }
+        return false;
+    }
+    static String parentWithFun(String funName, String childClass){
+        if(classHasFun(funName, childClass)) return childClass;
+        else return parentWithFun(funName, inheritGraph.map.get(childClass).parent);
     }
 }

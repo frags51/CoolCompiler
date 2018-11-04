@@ -183,11 +183,42 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.divide x, StringBuilder res) {
-        // TODO: check div by zero.
+        // TODO: (Check) check div by zero.
         StringBuilder L = new StringBuilder();
         StringBuilder R = new StringBuilder();
         x.e1.accept(this,L);
         x.e2.accept(this,R);
+
+        // check zero
+        String ifL = "if.then."+ IRBuilder.ifNumb;
+
+        String endL = "if.end."+IRBuilder.ifNumb;
+        IRBuilder.ifNumb++;
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = icmp eq ")
+                .append("i32").append(" ")
+                .append(R).append(", 0\n");
+        String cmpReg = "%"+(IRBuilder.varNumb-1);
+        IRBuilder.temp.append("\tbr i1 ").append(cmpReg).append(", label %").append(ifL).append(", label %").append(endL);
+
+        IRBuilder.temp.append("\n").append(ifL).append(":\n");
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%s"));
+        String pS = "%"+(IRBuilder.varNumb-1);
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%d\n"));
+        String pD = "%"+(IRBuilder.varNumb-1);
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("ERROR: Div by zero on Line: "));
+        String eS = "%"+(IRBuilder.varNumb-1);
+
+        IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append(eS).append(")\n");
+        IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pD).append(", i32 ").append(x.lineNo).append(")\n");
+        IRBuilder.temp.append("\tcall void @exit(i32 1)\n");
+        IRBuilder.temp.append("\tbr label %").append(endL).append("\n");
+
+        IRBuilder.temp.append(endL).append(":\n");
+        GlobalData.out.println(IRBuilder.temp);
+        // end check zero
+
         IRBuilder.createBinary(L.toString(),R.toString(),"div","i32");
         res.append("%").append(IRBuilder.varNumb-1);
 
@@ -261,6 +292,7 @@ public class CodeGenVisitor implements VisitorRet {
             IRBuilder.temp.append("\tcall void @").append(GlobalData.funMangledName(x.typeid, x.typeid)).append("(%class.");
             IRBuilder.temp.append(x.typeid).append("* ").append(res).append(")\n");
 
+            /*
             // Set TypeName
             if(x.typeid.equals("Object")){
                 IRBuilder.temp.append("\t%").append(IRBuilder.varNumb).append("= getelementptr inbounds %class.").append(x.typeid);
@@ -287,7 +319,7 @@ public class CodeGenVisitor implements VisitorRet {
                 IRBuilder.temp.append("\t store i8* %").append(IRBuilder.varNumb-1).append(", i8** %").append(IRBuilder.varNumb-2);
                 IRBuilder.temp.append("\n");
             }
-
+            */
             GlobalData.out.println(IRBuilder.temp.toString());
         }
     }
@@ -509,7 +541,73 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.static_dispatch x, StringBuilder res) {
-        
+        StringBuilder callerRes = new StringBuilder();
+        x.caller.accept(this, callerRes);
+
+        if(!GlobalData.isPrimitive(x.caller.type)){ // check isvoid
+            String ifL = "if.then."+ IRBuilder.ifNumb;
+
+            String endL = "if.end."+IRBuilder.ifNumb;
+            IRBuilder.ifNumb++;
+
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = icmp eq ")
+                    .append(IRBuilder.llvmTypeName(x.caller.type)).append(" ")
+                    .append(callerRes).append(", null\n");
+            String cmpReg = "%"+(IRBuilder.varNumb-1);
+            IRBuilder.temp.append("\tbr i1 ").append(cmpReg).append(", label %").append(ifL).append(", label %").append(endL);
+
+            IRBuilder.temp.append("\n").append(ifL).append(":\n");
+            IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%s"));
+            String pS = "%"+(IRBuilder.varNumb-1);
+            IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%d\n"));
+            String pD = "%"+(IRBuilder.varNumb-1);
+            IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("ERROR: Disp on Void->Line: "));
+            String eS = "%"+(IRBuilder.varNumb-1);
+
+            IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ")
+                    .append("call i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append(eS).append(")\n");
+            IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ")
+                    .append("call i32 (i8*, ...) @printf(i8* ").append(pD).append(", i32 ").append(x.lineNo).append(")\n");
+            IRBuilder.temp.append("\tcall void @exit(i32 1)\n");
+            IRBuilder.temp.append("\tbr label %").append(endL).append("\n");
+
+            IRBuilder.temp.append(endL).append(":\n");
+            GlobalData.out.println(IRBuilder.temp);
+        } // check isvoid
+
+        String ancestorWithFun = GlobalData.parentWithFun(x.name, x.typeid);
+        // Need to tpecast
+        if(!ancestorWithFun.equals(x.caller.type)){
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb())
+                    .append(IRBuilder.genTypCastPtr(x.caller.type, ancestorWithFun, callerRes.toString())).append("\n");
+            callerRes.setLength(0);
+            callerRes.append("%").append(IRBuilder.varNumb-1);
+            GlobalData.out.println(IRBuilder.temp);
+        }
+
+        StringBuilder fP = new StringBuilder("(").append(IRBuilder.llvmTypeName(ancestorWithFun)).append(" ");
+        fP.append(callerRes);
+        StringBuilder argRes = new StringBuilder();
+        for(AST.expression gg : x.actuals){
+            argRes.setLength(0);
+            fP.append(", ");
+            gg.accept(this, argRes);
+            fP.append(IRBuilder.llvmTypeName(gg.type));
+            fP.append(" ");
+            fP.append(argRes);
+        }
+        fP.append(")");
+
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb()).append(" = ")
+                .append("call ").append(IRBuilder.llvmTypeName(x.type)).append(" @");
+        IRBuilder.temp.append(GlobalData.funMangledName(x.name, ancestorWithFun))
+                .append(fP).append("\n");
+        GlobalData.out.println(IRBuilder.temp);
+        res.setLength(0);
+        res.append("%").append(IRBuilder.varNumb-1);
     }
 
     @Override
@@ -639,7 +737,12 @@ public class CodeGenVisitor implements VisitorRet {
 
     @Override
     public void visit(AST.class_ x, StringBuilder res) {
-
+        GlobalData.curClassName=x.name;
+        if(x.name.equals("Object")|| x.name.equals("Int")||x.name.equals("String")||x.name.equals("Bool")||x.name.equals("IO"))
+            return;
+        for(AST.feature g : x.features){
+            if(g instanceof AST.method) g.accept(this, new StringBuilder());
+        }
     }
 
     @Override
@@ -647,8 +750,16 @@ public class CodeGenVisitor implements VisitorRet {
         emitGlobalStrings();
         emitCFuncs();
         updateStructSize();
-
         emitConstructors();
+
+        for(AST.class_ gg : x.classes){
+            gg.accept(this, res);
+        }
+
+        emitIOFuncs();
+        emitObjectFuncs();
+        emitStringFuncs();
+        emitLLVMmain();
     }
 
 
@@ -659,9 +770,19 @@ public class CodeGenVisitor implements VisitorRet {
          */
         GlobalData.stringConstNames.put("%d", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("%d\n", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
         GlobalData.stringConstNames.put("%s", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("%s\n", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
         GlobalData.stringConstNames.put("", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("ERROR: Disp on Void->Line: ", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("ERROR: Div by zero on Line: ", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringNameNum++;
+        GlobalData.stringConstNames.put("Abort Called!\n", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
 
         GlobalData.out.println("; Global String Consts");
@@ -691,7 +812,7 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.out.println("declare i8* @strcat(i8*, i8*)\n");
         GlobalData.out.println("declare i64 @strlen(i8*)\n");
         GlobalData.out.println("declare void @exit(i32)\n");
-
+        GlobalData.out.println("declare i8* @strncpy(i8*, i8*, i64)");
     }
 
     private void updateStructSize(){
@@ -769,40 +890,50 @@ public class CodeGenVisitor implements VisitorRet {
     }
 
     static void emitConstructorsDFS(AST.class_ currClass){
+        System.out.println(currClass.name);
         GlobalData.curClassName = currClass.name;
-        if(currClass.name.equals("Int") || currClass.name.equals("String") || currClass.name.equals("IO") || currClass.name.equals("Object") || currClass.name.equals("Bool")) return ;
-        GlobalData.out.println("; Constructor for class "+currClass.name);
-        IRBuilder.varNumb = 0;
+        if(!(currClass.name.equals("Int") ||
+                currClass.name.equals("String") ||
+                currClass.name.equals("IO") ||
+                currClass.name.equals("Object") ||
+                currClass.name.equals("Bool"))) {
+            GlobalData.out.println("; Constructor for class " + currClass.name);
+            IRBuilder.varNumb = 0;
 
-        GlobalData.out.println("define void @" + GlobalData.funMangledName(currClass.name, currClass.name) + "(" + "%class."+currClass.name + "* %this) {");
+            GlobalData.out.println("define void @" + GlobalData.funMangledName(currClass.name, currClass.name) +
+                    "(" + "%class." + currClass.name + "* %this) {");
 
-        GlobalData.out.println("\nentry:");
-        callParentConstructor(currClass,"%this");
+            GlobalData.out.println("\nentry:");
+            callParentConstructor(currClass, "%this");
 
-        for(AST.feature f : currClass.features) {
-            if(f instanceof AST.attr) {
-                AST.attr a = (AST.attr) f;
-                //a.accept(this);
+            for (AST.feature f : currClass.features) {
+                if (f instanceof AST.attr) {
+                    AST.attr a = (AST.attr) f;
+                    a.accept(new CodeGenVisitor(), new StringBuilder());
+                }
             }
+
+            GlobalData.out.println("ret void\n}\n");
         }
-
-
+        for(String ch : currClass.children){
+            emitConstructorsDFS(GlobalData.inheritGraph.map.get(ch));
+        }
 
 
     }
 
     static void callParentConstructor(AST.class_ childClass, String childRegister) {
         String parentType = childClass.parent;
-        if(!parentType.equals(null)){
+        if(parentType!=null && !parentType.equals(null)){
             // CREATE CONVERT INSTRUCTION
             StringBuilder builder = new StringBuilder();
             String storeRegister = "%"+IRBuilder.varNumb;
             IRBuilder.varNumb++;
             builder.append(storeRegister);
             builder.append(" = ").append("bitcast");
-            builder.append(" ").append(childClass.name+"*");
+            builder.append(" ").append(IRBuilder.llvmTypeName(childClass.name));
             builder.append(" ").append(childRegister).append(" to ");
-            builder.append(parentType+"*");
+            builder.append(IRBuilder.llvmTypeName(parentType));
             GlobalData.out.println(builder.toString());
 
             builder.setLength(0);
@@ -812,6 +943,163 @@ public class CodeGenVisitor implements VisitorRet {
 
     }
 
+    private static void emitObjectFuncs(){
+        IRBuilder.varNumb = 0;
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for Abort(): \n");
+        IRBuilder.temp.append("define %class.Object* @").append(GlobalData.funMangledName("abort", "Object"))
+                .append("(%class.Object* %this){\nentry:\n");
 
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%s"));
+        String pS = "%"+(IRBuilder.varNumb-1);
 
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("Abort Called!\n"));
+        String eS = "%"+(IRBuilder.varNumb-1);
+
+        IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append(eS).append(")\n");
+        IRBuilder.temp.append("call void @exit(i32 0)");
+
+        // cleanup, add :Object return code
+        IRBuilder.temp.append("\t%dmyretval = call noalias i8* @malloc(i64 0)\n")
+                .append("\t%dmyretval2 = bitcast i8* %dmyretval to %class.Object*\n")
+                .append("\tret %class.Object* %dmyretval2\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+    }
+
+    private static void emitIOFuncs(){
+        IRBuilder.varNumb = 0;
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for IO.out_string(): \n");
+        IRBuilder.temp.append("define %class.IO* @").append(GlobalData.funMangledName("out_string", "IO"))
+                .append("(%class.IO* %this, i8* %toPrint){\nentry:\n");
+
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%s"));
+        String pS = "%"+(IRBuilder.varNumb-1);
+
+        IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append("%toPrint").append(")\n");
+
+        // cleanup, add :Object return code
+        IRBuilder.temp.append("\t%dmyretval = call noalias i8* @malloc(i64 8)\n")
+                .append("\t%dmyretval2 = bitcast i8* %dmyretval to %class.IO*\n")
+                .append("\tret %class.IO* %dmyretval2\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+
+        // out_int
+        IRBuilder.varNumb = 0;
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for IO.out_int(): \n");
+        IRBuilder.temp.append("define %class.IO* @").append(GlobalData.funMangledName("out_int", "IO"))
+                .append("(%class.IO* %this, i32 %toPrint){\nentry:\n");
+
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%d"));
+        pS = "%"+(IRBuilder.varNumb-1);
+
+        IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pS).append(", i32 ").append("%toPrint").append(")\n");
+
+        // cleanup, add :Object return code
+        IRBuilder.temp.append("\t%dmyretval = call noalias i8* @malloc(i64 8)\n")
+                .append("\t%dmyretval2 = bitcast i8* %dmyretval to %class.IO*\n")
+                .append("\tret %class.IO* %dmyretval2\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+
+        // in_int
+        IRBuilder.varNumb = 0;
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for IO.in_int(): \n");
+        IRBuilder.temp.append("define i32 @").append(GlobalData.funMangledName("in_int", "IO"))
+                .append("(%class.IO* %this){\nentry:\n");
+
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%d"));
+        pS = "%"+(IRBuilder.varNumb-1);
+
+        IRBuilder.temp.append("\n\t%store = alloca i32\n");
+
+        IRBuilder.temp.append("\n\t%cal = call i32 (i8*, ...) @__isoc99_scanf(i8* ").append(pS).append(", i32* ").append("%store").append(")\n");
+
+        // cleanup, add :Object return code
+        IRBuilder.temp.append("\t%dmyretval = load i32, i32* %store\n")
+                .append("\tret i32 %dmyretval\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+
+        // in_string
+        IRBuilder.varNumb = 0;
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for IO.in_string(): \n");
+        IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("in_string", "IO"))
+                .append("(%class.IO* %this){\nentry:\n");
+
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%s"));
+        pS = "%"+(IRBuilder.varNumb-1);
+
+        IRBuilder.temp.append("\n\t%store1 = alloca i8*\n");
+        IRBuilder.temp.append("\t%store = load i8*, i8** %store1\n");
+        IRBuilder.temp.append("\n\t%cal = call i32 (i8*, ...) @__isoc99_scanf(i8* ").append(pS).append(", i8* ").append("%store").append(")\n");
+
+        // cleanup, add :Object return code
+        IRBuilder.temp.append("\t%dmyretval = load i8*, i8** %store1\n")
+                .append("\tret i8* %dmyretval\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+    }
+
+    private static void emitStringFuncs(){
+        // length()
+        IRBuilder.varNumb = 0;
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for String.length(): \n");
+        IRBuilder.temp.append("define i32 @").append(GlobalData.funMangledName("length", "String"))
+                .append("(i8* %this){\nentry:\n");
+
+        IRBuilder.temp.append("\t%dmyretval1 = call i64 (i8*) @strlen(i8* %this)\n")
+                .append("%dmyretval = trunc i64 %dmyretval1 to i32\n")
+                .append("\tret i32 %dmyretval\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+
+        // concat()
+        IRBuilder.varNumb = 0;
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for String.concat(): \n");
+        IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("concat", "String"))
+                .append("(i8* %this, i8* %s2){\nentry:\n");
+
+        IRBuilder.temp.append("\t%l1 = call i64 @strlen(i8* %this)\n");
+        IRBuilder.temp.append("\t%l2 = call i64 @strlen(i8* %s2)\n");
+        IRBuilder.temp.append("\t%t1 = add i64 %l1, %l2\n");
+        IRBuilder.temp.append("\t%tot = add i64 %t1, 1\n");
+        IRBuilder.temp.append("\t%news = call noalias i8* @malloc(i64 %tot)\n");
+        IRBuilder.temp.append("\t%call1 = call i8* @strcpy(i8* %news, i8* %this)\n");
+        IRBuilder.temp.append("\t%call2 = call i8* @strcat(i8* %news, i8* %s2)\n");
+
+        IRBuilder.temp.append("\tret i8* %news\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+
+        // substr()
+        IRBuilder.varNumb = 0;
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for String.substr(), using strncpy: \n");
+        IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("substr", "String"))
+                .append("(i8* %this, i32 %s, i32 %e){\nentry:\n");
+
+        IRBuilder.temp.append("\t%l1 = zext i32 %e to i64\n");
+        IRBuilder.temp.append("\t%ptrfwd = getelementptr inbounds i8, i8* %this, i32 %s\n");
+        IRBuilder.temp.append("\t%news = call noalias i8* @malloc(i64 %l1)\n");
+        IRBuilder.temp.append("\t%call1 = call i8* @strncpy(i8* %news, i8* %ptrfwd, i64 %l1)\n");
+
+        IRBuilder.temp.append("\tret i8* %news\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+    }
+
+    private static void emitLLVMmain(){
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("; Driver Main\n");
+        IRBuilder.temp.append("define i32 @main() {\nentry:\n");
+        IRBuilder.temp.append("\t%m1 = call noalias i8* @malloc(i64 ").append(GlobalData.classtoSize.get("Main"))
+            .append(")\n");
+        IRBuilder.temp.append("\t%m = bitcast i8* %m1 to %class.Main*\n");
+        IRBuilder.temp.append("\tcall void @").append(GlobalData.funMangledName("Main", "Main"))
+                .append("(%class.Main* %m)\n");
+        IRBuilder.temp.append("\t%call = call ").append(IRBuilder.llvmTypeName(GlobalData.mainType))
+                .append(" @").append(GlobalData.funMangledName("main", "Main"))
+                .append("(%class.Main* %m)\n").append("ret i32 0\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+    }
 }
