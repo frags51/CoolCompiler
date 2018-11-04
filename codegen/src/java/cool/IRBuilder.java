@@ -10,6 +10,11 @@ class IRBuilder {
 
     static StringBuilder temp = new StringBuilder();
 
+    static int nextVarNumb(){
+        varNumb++;
+        return varNumb-1;
+    }
+
     static String gepString(String g) {
         StringBuilder temp = new StringBuilder();
         temp.append("getelementptr inbounds [").append(g.length() + 1).append(" x i8]");
