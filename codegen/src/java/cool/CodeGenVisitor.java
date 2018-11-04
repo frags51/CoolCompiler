@@ -377,7 +377,7 @@ public class CodeGenVisitor implements VisitorRet {
     private void updateStructDFS(String curr){
         AST.class_ currClass = GlobalData.inheritGraph.map.get(curr);
 
-        int init = 8,index = 1;
+        int init = 0,index = 1;
 
 
         if(curr.equals("Int") || curr.equals("String") || curr.equals("Bool")) return ;
@@ -405,7 +405,7 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.classtoSize.put("Int", 4);
         GlobalData.classtoSize.put("Bool", 1);
         GlobalData.classtoSize.put("String", 8);
-        GlobalData.classtoSize.put("Object", 0);
+        GlobalData.classtoSize.put("Object", 8);
         GlobalData.classtoSize.put("IO", 0);
     }
 
