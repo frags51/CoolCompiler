@@ -212,7 +212,7 @@ public class CodeGenVisitor implements VisitorRet {
 
         IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append(eS).append(")\n");
         IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pD).append(", i32 ").append(x.lineNo).append(")\n");
-        IRBuilder.temp.append("\tcall void @exit(int32 1)\n");
+        IRBuilder.temp.append("\tcall void @exit(i32 1)\n");
         IRBuilder.temp.append("\tbr label %").append(endL).append("\n");
 
         IRBuilder.temp.append(endL).append(":\n");
@@ -565,9 +565,11 @@ public class CodeGenVisitor implements VisitorRet {
             IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("ERROR: Disp on Void->Line: "));
             String eS = "%"+(IRBuilder.varNumb-1);
 
-            IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append(eS).append(")\n");
-            IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pD).append(", i32 ").append(x.lineNo).append(")\n");
-            IRBuilder.temp.append("\tcall void @exit(int32 1)\n");
+            IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ")
+                    .append("call i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append(eS).append(")\n");
+            IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ")
+                    .append("call i32 (i8*, ...) @printf(i8* ").append(pD).append(", i32 ").append(x.lineNo).append(")\n");
+            IRBuilder.temp.append("\tcall void @exit(i32 1)\n");
             IRBuilder.temp.append("\tbr label %").append(endL).append("\n");
 
             IRBuilder.temp.append(endL).append(":\n");
@@ -750,6 +752,14 @@ public class CodeGenVisitor implements VisitorRet {
         updateStructSize();
         emitConstructors();
 
+        for(AST.class_ gg : x.classes){
+            gg.accept(this, res);
+        }
+
+        emitIOFuncs();
+        emitObjectFuncs();
+        emitStringFuncs();
+        emitLLVMmain();
     }
 
 
@@ -802,7 +812,7 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.out.println("declare i8* @strcat(i8*, i8*)\n");
         GlobalData.out.println("declare i64 @strlen(i8*)\n");
         GlobalData.out.println("declare void @exit(i32)\n");
-
+        GlobalData.out.println("declare i8* @strncpy(i8*, i8*, i64)");
     }
 
     private void updateStructSize(){
@@ -880,40 +890,50 @@ public class CodeGenVisitor implements VisitorRet {
     }
 
     static void emitConstructorsDFS(AST.class_ currClass){
+        System.out.println(currClass.name);
         GlobalData.curClassName = currClass.name;
-        if(currClass.name.equals("Int") || currClass.name.equals("String") || currClass.name.equals("IO") || currClass.name.equals("Object") || currClass.name.equals("Bool")) return ;
-        GlobalData.out.println("; Constructor for class "+currClass.name);
-        IRBuilder.varNumb = 0;
+        if(!(currClass.name.equals("Int") ||
+                currClass.name.equals("String") ||
+                currClass.name.equals("IO") ||
+                currClass.name.equals("Object") ||
+                currClass.name.equals("Bool"))) {
+            GlobalData.out.println("; Constructor for class " + currClass.name);
+            IRBuilder.varNumb = 0;
 
-        GlobalData.out.println("define void @" + GlobalData.funMangledName(currClass.name, currClass.name) + "(" + "%class."+currClass.name + "* %this) {");
+            GlobalData.out.println("define void @" + GlobalData.funMangledName(currClass.name, currClass.name) +
+                    "(" + "%class." + currClass.name + "* %this) {");
 
-        GlobalData.out.println("\nentry:");
-        callParentConstructor(currClass,"%this");
+            GlobalData.out.println("\nentry:");
+            callParentConstructor(currClass, "%this");
 
-        for(AST.feature f : currClass.features) {
-            if(f instanceof AST.attr) {
-                AST.attr a = (AST.attr) f;
-                //a.accept(this);
+            for (AST.feature f : currClass.features) {
+                if (f instanceof AST.attr) {
+                    AST.attr a = (AST.attr) f;
+                    a.accept(new CodeGenVisitor(), new StringBuilder());
+                }
             }
+
+            GlobalData.out.println("ret void\n}\n");
         }
-
-
+        for(String ch : currClass.children){
+            emitConstructorsDFS(GlobalData.inheritGraph.map.get(ch));
+        }
 
 
     }
 
     static void callParentConstructor(AST.class_ childClass, String childRegister) {
         String parentType = childClass.parent;
-        if(!parentType.equals(null)){
+        if(parentType!=null && !parentType.equals(null)){
             // CREATE CONVERT INSTRUCTION
             StringBuilder builder = new StringBuilder();
             String storeRegister = "%"+IRBuilder.varNumb;
             IRBuilder.varNumb++;
             builder.append(storeRegister);
             builder.append(" = ").append("bitcast");
-            builder.append(" ").append(childClass.name+"*");
+            builder.append(" ").append(IRBuilder.llvmTypeName(childClass.name));
             builder.append(" ").append(childRegister).append(" to ");
-            builder.append(parentType+"*");
+            builder.append(IRBuilder.llvmTypeName(parentType));
             GlobalData.out.println(builder.toString());
 
             builder.setLength(0);
@@ -965,6 +985,7 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.out.println(IRBuilder.temp);
 
         // out_int
+        IRBuilder.varNumb = 0;
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\n; Code for IO.out_int(): \n");
         IRBuilder.temp.append("define %class.IO* @").append(GlobalData.funMangledName("out_int", "IO"))
@@ -982,6 +1003,7 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.out.println(IRBuilder.temp);
 
         // in_int
+        IRBuilder.varNumb = 0;
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\n; Code for IO.in_int(): \n");
         IRBuilder.temp.append("define i32 @").append(GlobalData.funMangledName("in_int", "IO"))
@@ -1000,6 +1022,7 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.out.println(IRBuilder.temp);
 
         // in_string
+        IRBuilder.varNumb = 0;
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\n; Code for IO.in_string(): \n");
         IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("in_string", "IO"))
@@ -1009,53 +1032,57 @@ public class CodeGenVisitor implements VisitorRet {
         pS = "%"+(IRBuilder.varNumb-1);
 
         IRBuilder.temp.append("\n\t%store1 = alloca i8*\n");
-        IRBuilder.temp.append("\t%store = load i8*, i8** %0\n");
+        IRBuilder.temp.append("\t%store = load i8*, i8** %store1\n");
         IRBuilder.temp.append("\n\t%cal = call i32 (i8*, ...) @__isoc99_scanf(i8* ").append(pS).append(", i8* ").append("%store").append(")\n");
 
         // cleanup, add :Object return code
-        IRBuilder.temp.append("\t%dmyretval = load i8*, i8** %store\n")
+        IRBuilder.temp.append("\t%dmyretval = load i8*, i8** %store1\n")
                 .append("\tret i8* %dmyretval\n}\n");
         GlobalData.out.println(IRBuilder.temp);
     }
 
     private static void emitStringFuncs(){
         // length()
+        IRBuilder.varNumb = 0;
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\n; Code for String.length(): \n");
         IRBuilder.temp.append("define i32 @").append(GlobalData.funMangledName("length", "String"))
                 .append("(i8* %this){\nentry:\n");
 
-        IRBuilder.temp.append("\t%dmyretval = call i64 (i8*) @strlen(i8* %this)\n")
-                .append("\tret i64 %dmyretval\n}\n");
+        IRBuilder.temp.append("\t%dmyretval1 = call i64 (i8*) @strlen(i8* %this)\n")
+                .append("%dmyretval = trunc i64 %dmyretval1 to i32\n")
+                .append("\tret i32 %dmyretval\n}\n");
         GlobalData.out.println(IRBuilder.temp);
 
         // concat()
+        IRBuilder.varNumb = 0;
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\n; Code for String.concat(): \n");
         IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("concat", "String"))
-                .append("(i8* %this, i8* s2){\nentry:\n");
+                .append("(i8* %this, i8* %s2){\nentry:\n");
 
         IRBuilder.temp.append("\t%l1 = call i64 @strlen(i8* %this)\n");
         IRBuilder.temp.append("\t%l2 = call i64 @strlen(i8* %s2)\n");
         IRBuilder.temp.append("\t%t1 = add i64 %l1, %l2\n");
         IRBuilder.temp.append("\t%tot = add i64 %t1, 1\n");
         IRBuilder.temp.append("\t%news = call noalias i8* @malloc(i64 %tot)\n");
-        IRBuilder.temp.append("\t%call1 = call i8* @strcpy(i8* news, i8* %this)\n");
-        IRBuilder.temp.append("\t%call2 = call i8* @strcat(i8* news, i8* %s2)\n");
+        IRBuilder.temp.append("\t%call1 = call i8* @strcpy(i8* %news, i8* %this)\n");
+        IRBuilder.temp.append("\t%call2 = call i8* @strcat(i8* %news, i8* %s2)\n");
 
         IRBuilder.temp.append("\tret i8* %news\n}\n");
         GlobalData.out.println(IRBuilder.temp);
 
         // substr()
+        IRBuilder.varNumb = 0;
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\n; Code for String.substr(), using strncpy: \n");
-        IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("concat", "String"))
+        IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("substr", "String"))
                 .append("(i8* %this, i32 %s, i32 %e){\nentry:\n");
 
         IRBuilder.temp.append("\t%l1 = zext i32 %e to i64\n");
-        IRBuilder.temp.append("\t%ptrfwd = getelementptr inbounds i8, i8* %this, i32 %s");
-        IRBuilder.temp.append("\t%news = call noalias i8* @malloc(i64 %e)\n");
-        IRBuilder.temp.append("\t%call1 = call i8* @strncpy(i8* news, i8* %ptrfwd, i64 %l1)\n");
+        IRBuilder.temp.append("\t%ptrfwd = getelementptr inbounds i8, i8* %this, i32 %s\n");
+        IRBuilder.temp.append("\t%news = call noalias i8* @malloc(i64 %l1)\n");
+        IRBuilder.temp.append("\t%call1 = call i8* @strncpy(i8* %news, i8* %ptrfwd, i64 %l1)\n");
 
         IRBuilder.temp.append("\tret i8* %news\n}\n");
         GlobalData.out.println(IRBuilder.temp);
@@ -1073,5 +1100,6 @@ public class CodeGenVisitor implements VisitorRet {
         IRBuilder.temp.append("\t%call = call ").append(IRBuilder.llvmTypeName(GlobalData.mainType))
                 .append(" @").append(GlobalData.funMangledName("main", "Main"))
                 .append("(%class.Main* %m)\n").append("ret i32 0\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
     }
 }
