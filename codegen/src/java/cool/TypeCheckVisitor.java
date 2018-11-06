@@ -363,7 +363,6 @@ public class TypeCheckVisitor implements Visitor{
 
         }
         List<String> argTypes = GlobalData.argTypesFromFun(GlobalData.funMangledName(x.name, callerType));
-
         Iterator<AST.expression> actIt = x.actuals.iterator();
         Iterator<String> typIt = argTypes.iterator();
         AST.expression nextExpr;

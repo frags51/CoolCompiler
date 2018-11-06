@@ -1,9 +1,6 @@
 package cool;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashMap;
+import java.util.*;
 
 public class CodeGenVisitor implements VisitorRet {
 
@@ -591,14 +588,34 @@ public class CodeGenVisitor implements VisitorRet {
 
         StringBuilder fP = new StringBuilder("(").append(IRBuilder.llvmTypeName(ancestorWithFun)).append(" ");
         fP.append(callerRes);
+        List<String> argTypes = GlobalData.argTypesFromFun(GlobalData.funMangledName(x.name, ancestorWithFun));
+        Iterator<String> typIt = argTypes.iterator();
+
         StringBuilder argRes = new StringBuilder();
         for(AST.expression gg : x.actuals){
-            argRes.setLength(0);
-            fP.append(", ");
-            gg.accept(this, argRes);
-            fP.append(IRBuilder.llvmTypeName(gg.type));
-            fP.append(" ");
-            fP.append(argRes);
+            String nextTyp = typIt.next();
+            if(nextTyp.equals(gg.type)){
+                argRes.setLength(0);
+                fP.append(", ");
+                gg.accept(this, argRes);
+                fP.append(IRBuilder.llvmTypeName(gg.type));
+                fP.append(" ");
+                fP.append(argRes);
+            }
+            else{
+                argRes.setLength(0);
+                fP.append(", ");
+                gg.accept(this, argRes);
+                StringBuilder tpCst = new StringBuilder();
+                tpCst.append("%").append(IRBuilder.nextVarNumb())
+                        .append(IRBuilder.genTypCastPtr(gg.type, nextTyp, argRes.toString()));
+                GlobalData.out.println(tpCst);
+                argRes.setLength(0);
+                argRes.append("%").append(IRBuilder.varNumb-1);
+                fP.append(IRBuilder.llvmTypeName(nextTyp));
+                fP.append(" ");
+                fP.append(argRes);
+            }
         }
         fP.append(")");
 
@@ -648,7 +665,7 @@ public class CodeGenVisitor implements VisitorRet {
         args.append(IRBuilder.llvmTypeName(GlobalData.curClassName)).append(" %this");
         for (AST.formal g : x.formals) {
             GlobalData.formalPMap.put(g.name, g.typeid);
-            args.append(", ").append(IRBuilder.llvmTypeName(g.typeid)).append(" %").append(x.name);
+            args.append(", ").append(IRBuilder.llvmTypeName(g.typeid)).append(" %").append(g.name);
         }
         args.append(") {\n");
 
