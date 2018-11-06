@@ -1,7 +1,14 @@
+-- Test: Primitive to Object Conversions
+-- Static Dispatch
+-- IO methods: out_string, out_int
+-- Primitive Assignment with new
+
 class A {
 	h: Int <-2;
     a: A;
-
+    d: Int <- new Int;
+    btest: Bool <- new Bool;
+    stest: String <- new String;
 };
 
 class B inherits A{
@@ -17,11 +24,11 @@ class E {
    
 
     e2 : Int <- new Int;
-    --e6 : Object <- new Int;
+    e6 : Object <- new Int;
     e3 : Object <- new IO;
-    --e4 : Object <- new String;
-    --e5 : Object <- new Bool;
-    --f : IO <- new IO;
+    e4 : Object <- new String;
+    e5 : A <- new B;
+    f : IO <- new IO;
 
     
     checkTypes() : Int {
@@ -40,10 +47,10 @@ class Main inherits IO {
     d: Bool <- true;
     main() : IO {
         {
-            a@B.abort();
+            --self@IO.in_int();
             a@B.g(a);
-        	--self@Main.out_int(5+6);
-        	self@IO.out_string("helloasfas");
+        	self@Main.out_int(5+6);
+        	self@IO.out_string("\nhelloasfas\n");
             -- e@E.checkTypes();
         }
     };

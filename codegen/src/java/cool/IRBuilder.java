@@ -74,8 +74,16 @@ class IRBuilder {
     }
 
     // vname contains % here
+    // t1 vname to t2
     static String genTypCastPtr(String t1, String t2, String vName){
-
+        if(GlobalData.isPrimitive(t1)){ // is primitive t1 Will alwways be typecasted to Object
+            StringBuilder lTemp = new StringBuilder("\t");
+            String tpRes = "%dmytpcast"+GlobalData.stringNameNum;
+            lTemp.append(tpRes).append(IRBuilder.genMalloc(GlobalData.classtoSize.get(t2)));
+            GlobalData.stringNameNum++;
+            GlobalData.out.println(lTemp);
+            return " = bitcast i8* " +" " + tpRes+" to "+llvmTypeName(t2)+"\n";
+        }
         return " = bitcast "+ llvmTypeName(t1) +" " + vName+" to "+llvmTypeName(t2)+"\n";
 
         //return " = bitcast %class."+t1+"* " + vName+" to %class."+t2+"*\n";
@@ -86,7 +94,7 @@ class IRBuilder {
 
     static void createBinary(String L, String R, String op,String type) {
         temp.setLength(0);
-        temp.append("\t%").append(varNumb).append(" = ").append(op).append(" ").append(type);
+        temp.append("\t%").append(varNumb).append(" = ").append(op).append(" ").append(type).append(" ");
         temp.append(L).append(", ").append(R).append("\n");
         varNumb++;
         GlobalData.out.println(temp.toString());

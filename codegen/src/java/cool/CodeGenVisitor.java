@@ -273,7 +273,13 @@ public class CodeGenVisitor implements VisitorRet {
     @Override
     public void visit(AST.new_ x, StringBuilder res) {
         if(x.typeid.equals("Int")) res.append("0");
-        else if(x.typeid.equals("String")) ;
+        else if(x.typeid.equals("String")) {
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = ")
+                    .append(IRBuilder.gepString("")).append("\n");
+            GlobalData.out.println(IRBuilder.temp);
+            res.append("%").append(IRBuilder.varNumb-1);
+        }
         else if(x.typeid.equals("Bool")) res.append("0");
         else{ // not a primitive type
             int size = GlobalData.classtoSize.get(x.typeid);
@@ -319,7 +325,7 @@ public class CodeGenVisitor implements VisitorRet {
             }
             */
             GlobalData.out.println(IRBuilder.temp.toString());
-        }
+        } //else
     }
 
     @Override
@@ -744,7 +750,7 @@ public class CodeGenVisitor implements VisitorRet {
         }
         else{ //TODO: (CHECK genTypCastPtr func) typecasting int/primitive to Object.
             IRBuilder.temp.setLength(0);
-            IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb())
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb())
                     .append(IRBuilder.genTypCastPtr(x.value.type, x.typeid, bodyRes.toString()));
             String toStore = "%"+(IRBuilder.varNumb-1);
 
@@ -887,7 +893,7 @@ public class CodeGenVisitor implements VisitorRet {
         else return 8;
     }
 
-    public static String getType(String type) {
+    private static String getType(String type) {
         if(type.equals("String")) {
             return "i8*";
         }
@@ -900,7 +906,7 @@ public class CodeGenVisitor implements VisitorRet {
         return "%class."+type + "*";
     }
 
-    static void emitConstructors(){
+    private static void emitConstructors(){
         GlobalData.out.println(IRBuilder.constructorObject());
         GlobalData.out.println(IRBuilder.constructorIO());
 
@@ -908,7 +914,7 @@ public class CodeGenVisitor implements VisitorRet {
         emitConstructorsDFS(root);
     }
 
-    static void emitConstructorsDFS(AST.class_ currClass){
+    private static void emitConstructorsDFS(AST.class_ currClass){
         GlobalData.curClassName = currClass.name;
         if(!(currClass.name.equals("Int") ||
                 currClass.name.equals("String") ||
@@ -940,11 +946,11 @@ public class CodeGenVisitor implements VisitorRet {
 
     }
 
-    static void callParentConstructor(AST.class_ childClass, String childRegister) {
+    private static void callParentConstructor(AST.class_ childClass, String childRegister) {
         String parentType = childClass.parent;
-        if(parentType!=null && !parentType.equals(null)){
+        if(parentType!=null){
             // CREATE CONVERT INSTRUCTION
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder("\t");
             String storeRegister = "%"+IRBuilder.varNumb;
             IRBuilder.varNumb++;
             builder.append(storeRegister);
@@ -955,7 +961,7 @@ public class CodeGenVisitor implements VisitorRet {
             GlobalData.out.println(builder.toString());
 
             builder.setLength(0);
-            builder.append("call void @").append(GlobalData.funMangledName(parentType, parentType)).append("(").append("%class."+parentType).append("* ").append(storeRegister).append(")");
+            builder.append("\tcall void @").append(GlobalData.funMangledName(parentType, parentType)).append("(").append("%class."+parentType).append("* ").append(storeRegister).append(")");
             GlobalData.out.println(builder.toString());
         }
 
