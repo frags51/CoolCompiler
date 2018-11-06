@@ -27,7 +27,7 @@ class E {
     e6 : Object <- new Int;
     e3 : Object <- new IO;
     e4 : Object <- new String;
-    e5 : Object <- new Bool;
+    e5 : A <- new B;
     f : IO <- new IO;
 
     
