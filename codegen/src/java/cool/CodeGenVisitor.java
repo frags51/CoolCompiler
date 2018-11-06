@@ -822,7 +822,7 @@ public class CodeGenVisitor implements VisitorRet {
         updateDefaultSize();
         GlobalData.out.println();
         GlobalData.out.println("; Class Declarations\n");
-        GlobalData.out.println("%class."+root.name+ " = type {i8*}");
+        GlobalData.out.println("%class."+root.name+ " = type {}");
         for(String child : root.children)
             updateStructDFS(child);
     }
@@ -858,7 +858,7 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.classtoSize.put("Int", 4);
         GlobalData.classtoSize.put("Bool", 1);
         GlobalData.classtoSize.put("String", 8);
-        GlobalData.classtoSize.put("Object", 8);
+        GlobalData.classtoSize.put("Object", 0);
         GlobalData.classtoSize.put("IO", 0);
     }
 
