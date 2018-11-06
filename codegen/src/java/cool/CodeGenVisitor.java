@@ -43,15 +43,16 @@ public class CodeGenVisitor implements VisitorRet {
         }
         if(GlobalData.isFormalP(x.name)){ // load this thing up in memory.
             IRBuilder.temp.setLength(0);
-            IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb()).append(" = load ").append(IRBuilder.llvmTypeName(x.type))
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = load ").append(IRBuilder.llvmTypeName(x.type))
                     .append(" , ").append(IRBuilder.llvmTypeName(x.type)).append("*").append(" %").append(x.name).append(".addr")
                     .append("\n");
             GlobalData.out.println(IRBuilder.temp);
             res.append("%").append(IRBuilder.varNumb-1);
         }
         else{
-            StringBuilder gep = new StringBuilder(" = getelementptr inbounds ").append(IRBuilder.llvmTypeNameNotPtr(GlobalData.curClassName))
-                    .append(" ").append(IRBuilder.llvmTypeName(GlobalData.curClassName)).append(" %this, ");
+            StringBuilder gep = new StringBuilder(" = getelementptr inbounds ")
+                    .append(IRBuilder.llvmTypeNameNotPtr(GlobalData.curClassName))
+                    .append(", ").append(IRBuilder.llvmTypeName(GlobalData.curClassName)).append(" %this, ");
             int i = 0, ind=0;
             String tClass = GlobalData.curClassName;
             while(true){ // loop will definitely end!
@@ -60,7 +61,7 @@ public class CodeGenVisitor implements VisitorRet {
                     break;
                 }
                 else{
-                    if(GlobalError.DBG) System.out.println("; In loop! CodeGenVisitor AST.assign!");
+
                     tClass = GlobalData.inheritGraph.map.get(tClass).parent;
                     i++;
                 }
@@ -70,7 +71,7 @@ public class CodeGenVisitor implements VisitorRet {
             IRBuilder.temp.setLength(0);
             IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(gep);
 
-            IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb()).append(" = load ").append(IRBuilder.llvmTypeName(x.type))
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = load ").append(IRBuilder.llvmTypeName(x.type))
                     .append(" , ").append(IRBuilder.llvmTypeName(x.type)).append("*").append(" %").append(IRBuilder.varNumb-2)
                     .append("\n");
             GlobalData.out.println(IRBuilder.temp);
@@ -349,8 +350,9 @@ public class CodeGenVisitor implements VisitorRet {
             }
         }
         else{
-            StringBuilder gep = new StringBuilder(" = getelementptr inbounds ").append(IRBuilder.llvmTypeNameNotPtr(GlobalData.curClassName))
-                    .append(" ").append(IRBuilder.llvmTypeName(GlobalData.curClassName)).append(" %this, ");
+            StringBuilder gep = new StringBuilder(" = getelementptr inbounds ")
+                    .append(IRBuilder.llvmTypeNameNotPtr(GlobalData.curClassName))
+                    .append(", ").append(IRBuilder.llvmTypeName(GlobalData.curClassName)).append(" %this, ");
             int i = 0, ind=0;
             String tClass = GlobalData.curClassName;
             while(true){ // loop will definitely end!
@@ -663,7 +665,7 @@ public class CodeGenVisitor implements VisitorRet {
         // Now need to alloc these formals onto the stack.
         for (AST.formal g : x.formals){
             IRBuilder.temp.setLength(0);
-            IRBuilder.temp.append("\t%").append(g.name).append(".addr  = alloca")
+            IRBuilder.temp.append("\t%").append(g.name).append(".addr  = alloca ")
                     .append(IRBuilder.llvmTypeName(g.typeid)).append("\n");
             IRBuilder.temp.append("\tstore ").append(IRBuilder.llvmTypeName(g.typeid)).append(" %").append(g.name)
                     .append(", ").append(IRBuilder.llvmTypeName(g.typeid)).append("* %").append(g.name).append(".addr")
