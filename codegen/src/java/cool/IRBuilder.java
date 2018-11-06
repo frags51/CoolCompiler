@@ -94,7 +94,7 @@ class IRBuilder {
 
     static void createBinary(String L, String R, String op,String type) {
         temp.setLength(0);
-        temp.append("\t%").append(varNumb).append(" = ").append(op).append(" ").append(type);
+        temp.append("\t%").append(varNumb).append(" = ").append(op).append(" ").append(type).append(" ");
         temp.append(L).append(", ").append(R).append("\n");
         varNumb++;
         GlobalData.out.println(temp.toString());

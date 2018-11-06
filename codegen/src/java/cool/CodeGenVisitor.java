@@ -273,7 +273,13 @@ public class CodeGenVisitor implements VisitorRet {
     @Override
     public void visit(AST.new_ x, StringBuilder res) {
         if(x.typeid.equals("Int")) res.append("0");
-        else if(x.typeid.equals("String")) ;
+        else if(x.typeid.equals("String")) {
+            IRBuilder.temp.setLength(0);
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = ")
+                    .append(IRBuilder.gepString("")).append("\n");
+            GlobalData.out.println(IRBuilder.temp);
+            res.append("%").append(IRBuilder.varNumb-1);
+        }
         else if(x.typeid.equals("Bool")) res.append("0");
         else{ // not a primitive type
             int size = GlobalData.classtoSize.get(x.typeid);
@@ -319,7 +325,7 @@ public class CodeGenVisitor implements VisitorRet {
             }
             */
             GlobalData.out.println(IRBuilder.temp.toString());
-        }
+        } //else
     }
 
     @Override
