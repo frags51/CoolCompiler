@@ -943,6 +943,23 @@ public class CodeGenVisitor implements VisitorRet {
     }
 
     private static void emitObjectFuncs(){
+        // TYPE_NAME
+        IRBuilder.varNumb = 0;
+        IRBuilder.temp.setLength(0);
+        IRBuilder.temp.append("\n; Code for Object.type_name(): \n");
+        IRBuilder.temp.append("define i8* @").append(GlobalData.funMangledName("type_name", "Object"))
+                .append("(%class.Object* %this){\nentry:\n");
+
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("Object"));
+        String eS = "%"+(IRBuilder.varNumb-1);
+
+
+        // cleanup, add :Object return code
+        IRBuilder.temp.append("\t\nret i8* ").append(eS).append("\n}\n");
+                //.append("\tret %i8* %dmyretval\n}\n");
+        GlobalData.out.println(IRBuilder.temp);
+
+        // Abort
         IRBuilder.varNumb = 0;
         IRBuilder.temp.setLength(0);
         IRBuilder.temp.append("\n; Code for Abort(): \n");
@@ -953,7 +970,7 @@ public class CodeGenVisitor implements VisitorRet {
         String pS = "%"+(IRBuilder.varNumb-1);
 
         IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("Abort Called!\n"));
-        String eS = "%"+(IRBuilder.varNumb-1);
+        eS = "%"+(IRBuilder.varNumb-1);
 
         IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append(eS).append(")\n");
         IRBuilder.temp.append("call void @exit(i32 0)");
