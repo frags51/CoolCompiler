@@ -40,7 +40,8 @@ class Main inherits IO {
     d: Bool <- true;
     main() : IO {
         {
-            a@B.g(a);          
+            a@B.abort();
+            a@B.g(a);
         	--self@Main.out_int(5+6);
         	self@IO.out_string("helloasfas");
             -- e@E.checkTypes();

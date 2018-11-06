@@ -356,7 +356,8 @@ public class TypeCheckVisitor implements Visitor{
             return;
         }
         String ancestorWithFun = GlobalData.parentWithFun(x.name, x.typeid);
-        String fRetType = GlobalData.getReturnType(GlobalData.funMangledName(x.name, ancestorWithFun));
+        callerType=ancestorWithFun;
+        String fRetType = GlobalData.getReturnType(GlobalData.funMangledName(x.name, callerType));
         if(fRetType==null){
             GlobalError.reportError(GlobalData.curFileName, x.lineNo, "ERROR: Function "+x.name+" not declared!");
             x.type = "Object";
