@@ -205,11 +205,13 @@ public class CodeGenVisitor implements VisitorRet {
         String pS = "%"+(IRBuilder.varNumb-1);
         IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("%d\n"));
         String pD = "%"+(IRBuilder.varNumb-1);
-        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("ERROR: Div by zero on Line: "));
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ").append(IRBuilder.gepString("\nERROR: Div by zero on Line: "));
         String eS = "%"+(IRBuilder.varNumb-1);
 
-        IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append(eS).append(")\n");
-        IRBuilder.temp.append("\n\tcall i32 (i8*, ...) @printf(i8* ").append(pD).append(", i32 ").append(x.lineNo).append(")\n");
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ")
+                .append("call i32 (i8*, ...) @printf(i8* ").append(pS).append(", i8* ").append(eS).append(")\n");
+        IRBuilder.temp.append("\n\t%").append(IRBuilder.nextVarNumb()).append(" = ")
+                .append("call i32 (i8*, ...) @printf(i8* ").append(pD).append(", i32 ").append(x.lineNo).append(")\n");
         IRBuilder.temp.append("\tcall void @exit(i32 1)\n");
         IRBuilder.temp.append("\tbr label %").append(endL).append("\n");
 
@@ -217,7 +219,7 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.out.println(IRBuilder.temp);
         // end check zero
 
-        IRBuilder.createBinary(L.toString(),R.toString(),"div","i32");
+        IRBuilder.createBinary(L.toString(),R.toString(),"sdiv","i32");
         res.append("%").append(IRBuilder.varNumb-1);
 
     }
@@ -395,6 +397,7 @@ public class CodeGenVisitor implements VisitorRet {
     public void visit(AST.block x, StringBuilder res) {
         StringBuilder R = new StringBuilder();
         for(AST.expression e: x.l1){
+            R.setLength(0);
             e.accept(this, R);
         }
         res.append(R);
@@ -428,8 +431,8 @@ public class CodeGenVisitor implements VisitorRet {
 
         /* Condition break */
         StringBuilder breakBuild = new StringBuilder();
-        breakBuild.append("br i1 ");
-        breakBuild.append("%").append(IRBuilder.varNumb).append(", ");
+        breakBuild.append("\tbr i1 ");
+        breakBuild.append("%").append(IRBuilder.varNumb-1).append(", ");
         breakBuild.append("label %").append(whileBodyLabel);
         breakBuild.append(", label %").append(whileEndLabel);
         GlobalData.out.println(breakBuild.toString());
@@ -443,11 +446,11 @@ public class CodeGenVisitor implements VisitorRet {
 
         /* Another break */
         condBreak.setLength(0);
-        condBreak.append("br label %").append(whileCondLabel);
+        condBreak.append("\tbr label %").append(whileCondLabel);
         GlobalData.out.println(condBreak.toString());
 
         StringBuilder endLabel = new StringBuilder();
-        bodyLabel.append("\n").append(whileEndLabel).append(":");
+        endLabel.append("\n").append(whileEndLabel).append(":");
         GlobalData.out.println(endLabel.toString());
 
     }
@@ -507,9 +510,9 @@ public class CodeGenVisitor implements VisitorRet {
         // if no typecasts reqruied:
         if(resultType.equals(x.ifbody.type) && resultType.equals(x.elsebody.type)){
             IRBuilder.temp.setLength(0);
-            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = phi ").append(resultType);
-            IRBuilder.temp.append(" [ ").append(ifbuilder.toString()).append(", ").append(ifLabel).append(" ],");
-            IRBuilder.temp.append(" [ ").append(elseBuilder.toString()).append(", ").append(elseLabel).append(" ]\n");
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = phi ").append(IRBuilder.llvmTypeName(resultType));
+            IRBuilder.temp.append(" [ ").append(ifbuilder.toString()).append(", %").append(ifLabel).append(" ],");
+            IRBuilder.temp.append(" [ ").append(elseBuilder.toString()).append(", %").append(elseLabel).append(" ]\n");
             GlobalData.out.println(IRBuilder.temp.toString());
 
             res.setLength(0);
@@ -523,9 +526,9 @@ public class CodeGenVisitor implements VisitorRet {
             IRBuilder.temp.append("\n");
 
             IRBuilder.temp.setLength(0);
-            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = phi ").append(resultType);
-            IRBuilder.temp.append(" [ ").append(IRBuilder.varNumb-2).append(", ").append(ifLabel).append(" ],");
-            IRBuilder.temp.append(" [ ").append(IRBuilder.varNumb-1).append(", ").append(elseLabel).append(" ]\n");
+            IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = phi ").append(IRBuilder.llvmTypeName(resultType));
+            IRBuilder.temp.append(" [ ").append(IRBuilder.varNumb-2).append(", %").append(ifLabel).append(" ],");
+            IRBuilder.temp.append(" [ ").append(IRBuilder.varNumb-1).append(", %").append(elseLabel).append(" ]\n");
             GlobalData.out.println(IRBuilder.temp.toString());
 
             res.setLength(0);
@@ -613,7 +616,7 @@ public class CodeGenVisitor implements VisitorRet {
                 fP.append(", ");
                 gg.accept(this, argRes);
                 StringBuilder tpCst = new StringBuilder();
-                tpCst.append("%").append(IRBuilder.nextVarNumb())
+                tpCst.append("\t%").append(IRBuilder.nextVarNumb())
                         .append(IRBuilder.genTypCastPtr(gg.type, nextTyp, argRes.toString()));
                 GlobalData.out.println(tpCst);
                 argRes.setLength(0);
@@ -626,7 +629,7 @@ public class CodeGenVisitor implements VisitorRet {
         fP.append(")");
 
         IRBuilder.temp.setLength(0);
-        IRBuilder.temp.append("%").append(IRBuilder.nextVarNumb()).append(" = ")
+        IRBuilder.temp.append("\t%").append(IRBuilder.nextVarNumb()).append(" = ")
                 .append("call ").append(IRBuilder.llvmTypeName(x.type)).append(" @");
         IRBuilder.temp.append(GlobalData.funMangledName(x.name, ancestorWithFun))
                 .append(fP).append("\n");
@@ -731,7 +734,8 @@ public class CodeGenVisitor implements VisitorRet {
             if(x.typeid.equals("Int")||x.typeid.equals("Bool")) toStore="0";
             else if(x.typeid.equals("String")){
                 StringBuilder tmp = new StringBuilder("\t");
-                tmp.append("%").append(IRBuilder.nextVarNumb()).append(IRBuilder.gepString(""));
+                tmp.append("%").append(IRBuilder.nextVarNumb()).append(" = ")
+                        .append(IRBuilder.gepString(""));
                 GlobalData.out.println(tmp);
                 toStore="%"+(IRBuilder.varNumb-1);
             }
@@ -805,7 +809,7 @@ public class CodeGenVisitor implements VisitorRet {
         GlobalData.stringNameNum++;
         GlobalData.stringConstNames.put("ERROR: Disp on Void->Line: ", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
-        GlobalData.stringConstNames.put("ERROR: Div by zero on Line: ", IRBuilder.strGlobal + GlobalData.stringNameNum);
+        GlobalData.stringConstNames.put("\nERROR: Div by zero on Line: ", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
         GlobalData.stringConstNames.put("Abort Called!\n", IRBuilder.strGlobal + GlobalData.stringNameNum);
         GlobalData.stringNameNum++;
